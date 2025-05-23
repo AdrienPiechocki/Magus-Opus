@@ -1,0 +1,79 @@
+[gd_scene load_steps=18 format=3 uid="uid://c2hga5cenvr6p"]
+
+[ext_resource type="Script" uid="uid://bqp2k3u1nrftl" path="res://Scripts/Player.gd" id="1_5wxv7"]
+[ext_resource type="Script" uid="uid://yw180iquco87" path="res://Scripts/SpriteManager.gd" id="3_y5hcb"]
+[ext_resource type="Texture2D" uid="uid://bdw3ul5g2f4ke" path="res://Graphics/textures/GuardNorth.png" id="4_2nftw"]
+[ext_resource type="Texture2D" uid="uid://cxvd0gyeynn55" path="res://Graphics/textures/GuardNE.png" id="5_2xbkd"]
+[ext_resource type="Texture2D" uid="uid://b8etw876tpi8s" path="res://Graphics/textures/GuardEast.png" id="6_3vpsw"]
+[ext_resource type="Texture2D" uid="uid://dxinsug0pk000" path="res://Graphics/textures/GuardSE.png" id="7_m62uw"]
+[ext_resource type="Texture2D" uid="uid://c0s0xl2xv0yqn" path="res://Graphics/textures/GuardSouth.png" id="8_b30ri"]
+[ext_resource type="Texture2D" uid="uid://njgnvya7tcq0" path="res://Graphics/textures/GuardSW.png" id="9_ms580"]
+[ext_resource type="Texture2D" uid="uid://bdam4uoo3aocs" path="res://Graphics/textures/GuardWest.png" id="10_q7l0e"]
+[ext_resource type="Texture2D" uid="uid://dm5rgqysousaa" path="res://Graphics/textures/GuardNW.png" id="11_0fs2y"]
+[ext_resource type="Script" uid="uid://c2s40v7gla3u6" path="res://Scripts/PlayerInputs.gd" id="12_3vpsw"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_5wxv7"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0vlgb"]
+resource_local_to_scene = true
+transparency = 1
+albedo_texture = ExtResource("4_2nftw")
+billboard_mode = 2
+
+[sub_resource type="QuadMesh" id="QuadMesh_y5hcb"]
+resource_local_to_scene = true
+material = SubResource("StandardMaterial3D_0vlgb")
+size = Vector2(1, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2xbkd"]
+size = Vector3(0.2, 0.2, 0.2)
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2xbkd"]
+properties/0/path = NodePath(".:synced_position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath("MeshInstance3D:mat")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_3vpsw"]
+properties/0/path = NodePath(".:motion")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+
+[node name="Player" type="CharacterBody3D" groups=["Player"]]
+script = ExtResource("1_5wxv7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_5wxv7")
+disabled = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_y5hcb")
+script = ExtResource("3_y5hcb")
+North = ExtResource("4_2nftw")
+NorthEast = ExtResource("5_2xbkd")
+East = ExtResource("6_3vpsw")
+SouthEast = ExtResource("7_m62uw")
+South = ExtResource("8_b30ri")
+SouthWest = ExtResource("9_ms580")
+West = ExtResource("10_q7l0e")
+NorthWest = ExtResource("11_0fs2y")
+
+[node name="head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+
+[node name="Camera3D" type="Camera3D" parent="head"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+mesh = SubResource("BoxMesh_2xbkd")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_2xbkd")
+
+[node name="Inputs" type="Node" parent="."]
+script = ExtResource("12_3vpsw")
+
+[node name="InputSynchronizer" type="MultiplayerSynchronizer" parent="Inputs"]
+replication_config = SubResource("SceneReplicationConfig_3vpsw")

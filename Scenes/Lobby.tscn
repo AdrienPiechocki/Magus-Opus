@@ -1,0 +1,120 @@
+[gd_scene load_steps=2 format=3 uid="uid://crsckic2hwo3n"]
+
+[ext_resource type="Script" uid="uid://b1qc3vbb70x0y" path="res://Scripts/LobbyManager.gd" id="1_bpe3w"]
+
+[node name="Lobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bpe3w")
+
+[node name="Connect" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -125.0
+offset_top = -75.0
+offset_right = 125.0
+offset_bottom = 75.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NameLabel" type="Label" parent="Connect"]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 3.0
+offset_right = 70.0
+offset_bottom = 26.0
+text = "Name :"
+
+[node name="Name" type="LineEdit" parent="Connect"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 29.0
+offset_right = 174.0
+offset_bottom = 60.0
+
+[node name="IPLabel" type="Label" parent="Connect"]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 69.0
+offset_right = 70.0
+offset_bottom = 92.0
+text = "IP :"
+
+[node name="IPAddress" type="LineEdit" parent="Connect"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 95.0
+offset_right = 174.0
+offset_bottom = 126.0
+
+[node name="Host" type="Button" parent="Connect"]
+layout_mode = 0
+offset_left = 188.0
+offset_top = 29.0
+offset_right = 242.105
+offset_bottom = 60.0
+text = "Host"
+
+[node name="Join" type="Button" parent="Connect"]
+layout_mode = 0
+offset_left = 190.0
+offset_top = 94.0
+offset_right = 244.105
+offset_bottom = 125.0
+text = "Join"
+
+[node name="ErrorLabel" type="Label" parent="Connect"]
+layout_mode = 0
+offset_left = -51.0
+offset_top = 153.0
+offset_right = 298.0
+offset_bottom = 209.0
+
+[node name="Players" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -109.5
+offset_top = -168.5
+offset_right = 109.5
+offset_bottom = 168.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Players"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="List" type="ItemList" parent="Players"]
+layout_mode = 0
+offset_left = 20.5
+offset_top = 25.5
+offset_right = 196.5
+offset_bottom = 269.5
+
+[node name="Start" type="Button" parent="Players"]
+layout_mode = 0
+offset_left = 67.5
+offset_top = 287.5
+offset_right = 146.5
+offset_bottom = 318.5
+text = "Start"
+
+[node name="ErrorDialog" type="AcceptDialog" parent="."]
+
+[connection signal="pressed" from="Connect/Host" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="Connect/Join" to="." method="_on_join_pressed"]
+[connection signal="pressed" from="Players/Start" to="." method="_on_start_pressed"]

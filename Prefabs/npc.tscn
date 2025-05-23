@@ -1,0 +1,42 @@
+[gd_scene load_steps=14 format=3 uid="uid://cwng1l8d3835m"]
+
+[ext_resource type="Script" uid="uid://domlqkgbhyeck" path="res://Scripts/npc.gd" id="1_nrg37"]
+[ext_resource type="Script" uid="uid://yw180iquco87" path="res://Scripts/SpriteManager.gd" id="2_nrg37"]
+[ext_resource type="Texture2D" uid="uid://bdw3ul5g2f4ke" path="res://Graphics/textures/GuardNorth.png" id="4_phvsa"]
+[ext_resource type="Texture2D" uid="uid://cxvd0gyeynn55" path="res://Graphics/textures/GuardNE.png" id="5_8yhpb"]
+[ext_resource type="Texture2D" uid="uid://b8etw876tpi8s" path="res://Graphics/textures/GuardEast.png" id="6_qj4yi"]
+[ext_resource type="Texture2D" uid="uid://dxinsug0pk000" path="res://Graphics/textures/GuardSE.png" id="7_ymbq2"]
+[ext_resource type="Texture2D" uid="uid://c0s0xl2xv0yqn" path="res://Graphics/textures/GuardSouth.png" id="8_eic0c"]
+[ext_resource type="Texture2D" uid="uid://njgnvya7tcq0" path="res://Graphics/textures/GuardSW.png" id="9_m46qm"]
+[ext_resource type="Texture2D" uid="uid://bdam4uoo3aocs" path="res://Graphics/textures/GuardWest.png" id="10_ktunr"]
+[ext_resource type="Texture2D" uid="uid://dm5rgqysousaa" path="res://Graphics/textures/GuardNW.png" id="11_1qlhg"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_nrg37"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0vlgb"]
+resource_local_to_scene = true
+transparency = 1
+albedo_texture = ExtResource("4_phvsa")
+billboard_mode = 2
+
+[sub_resource type="QuadMesh" id="QuadMesh_whts2"]
+material = SubResource("StandardMaterial3D_0vlgb")
+size = Vector2(1, 2)
+
+[node name="NPC" type="CharacterBody3D"]
+script = ExtResource("1_nrg37")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_nrg37")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_whts2")
+script = ExtResource("2_nrg37")
+North = ExtResource("4_phvsa")
+NorthEast = ExtResource("5_8yhpb")
+East = ExtResource("6_qj4yi")
+SouthEast = ExtResource("7_ymbq2")
+South = ExtResource("8_eic0c")
+SouthWest = ExtResource("9_m46qm")
+West = ExtResource("10_ktunr")
+NorthWest = ExtResource("11_1qlhg")
