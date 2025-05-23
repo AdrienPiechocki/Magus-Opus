@@ -1,6 +1,7 @@
 extends CharacterBody3D
 
 var speed:float = 4.0
+var gravity:float = 8.0
 
 @export var synced_position := Vector3()
 
@@ -25,4 +26,6 @@ func _physics_process(_delta: float) -> void:
 		position = synced_position
 		
 	velocity = inputs.motion * speed
+	if !is_on_floor():
+		velocity.y -= gravity
 	move_and_slide()
