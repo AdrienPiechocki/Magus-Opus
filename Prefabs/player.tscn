@@ -70,3 +70,7 @@ script = ExtResource("12_3vpsw")
 
 [node name="InputSynchronizer" type="MultiplayerSynchronizer" parent="Inputs"]
 replication_config = SubResource("SceneReplicationConfig_3vpsw")
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+billboard = 2
