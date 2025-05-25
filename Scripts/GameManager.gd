@@ -6,13 +6,14 @@ const DEFAULT_PORT = 8890
 # Max number of players.
 const MAX_PEERS = 3
 
-var peer = null
+var peer = ENetMultiplayerPeer.new()
 
 var is_host = false
 var external_oid = ""
+var server_started:bool = false
 
 # Name for my player.
-var player_name = "Krash Test"
+var player_name = "Player"
 
 # Names for remote players in id:name format.
 var players = {}
@@ -36,9 +37,9 @@ func _player_disconnected(id):
 		if multiplayer.is_server():
 			game_error.emit("Player " + players[id] + " disconnected")
 			end_game()
-	else: # Game is not in progress.
-		# Unregister this player.
-		unregister_player(id)
+	#else: # Game is not in progress.
+		## Unregister this player.
+		#unregister_player(id)
 
 
 # Callback from SceneTree, only for clients (not server).
@@ -54,9 +55,11 @@ func _connected_ok_noray():
 
 # Callback from SceneTree, only for clients (not server).
 func _server_disconnected():
-	game_error.emit("Server disconnected")
+	#game_error.emit("Server disconnected")
+	peer.close()
 	end_game()
-
+	if is_multiplayer():
+		unregister_player(1)
 
 # Callback from SceneTree, only for clients (not server).
 func _connected_fail():
@@ -72,8 +75,14 @@ func register_player(new_player_name):
 	player_list_changed.emit()
 	print("Player ", new_player_name, " connected with ID ", id)
 
+@rpc("any_peer")
 func unregister_player(id):
 	players.erase(id)
+	if multiplayer.get_peers().is_empty():
+		is_host = false
+		peer.close()
+	elif id != 1:
+		multiplayer.multiplayer_peer.disconnect_peer(id)
 	player_list_changed.emit()
 
 
@@ -86,21 +95,18 @@ func load_world():
 
 func host_game_local(new_player_name):
 	player_name = new_player_name
-	peer = ENetMultiplayerPeer.new()
 	peer.create_server(DEFAULT_PORT, MAX_PEERS)
 	multiplayer.multiplayer_peer = peer
 	is_host = true
 
 func host_game_noray(new_player_name):
 	player_name = new_player_name
-	peer = ENetMultiplayerPeer.new()
 	peer.create_server(Noray.local_port, MAX_PEERS)
 	multiplayer.multiplayer_peer = peer
 	is_host = true
-
+	
 func join_game_local(ip, new_player_name):
 	player_name = new_player_name
-	peer = ENetMultiplayerPeer.new()
 	peer.create_client(ip, DEFAULT_PORT)
 	multiplayer.multiplayer_peer = peer
 
@@ -188,7 +194,6 @@ func connect_to_server(address, port):
 		else:
 			print("Handshake success")
 		
-		peer = ENetMultiplayerPeer.new()
 		err = peer.create_client(address, port, 0, 0, 0, Noray.local_port)
 		
 		if err != OK:
@@ -201,3 +206,14 @@ func connect_to_server(address, port):
 		err = await PacketHandshake.over_enet(multiplayer.multiplayer_peer.host, address, port)
 	
 	return err
+
+func is_multiplayer():
+	if not players.keys().is_empty():
+		_is_multiplayer.rpc_id(players.keys()[0])
+		return server_started
+	else:
+		return false
+
+@rpc("any_peer", "reliable")
+func _is_multiplayer():
+	server_started = multiplayer.multiplayer_peer != null
