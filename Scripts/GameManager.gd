@@ -1,14 +1,15 @@
 extends Node
 
-# Default game server port. Can be any number between 1024 and 49151.
-# Not on the list of registered or common ports as of November 2020:
-# https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
-const DEFAULT_PORT = 4242
+const NORAY_ADDRESS = "tomfol.io"
+const DEFAULT_PORT = 8890
 
 # Max number of players.
 const MAX_PEERS = 3
 
 var peer = null
+
+var is_host = false
+var external_oid = ""
 
 # Name for my player.
 var player_name = "Krash Test"
@@ -22,6 +23,7 @@ signal connection_failed()
 signal connection_succeeded()
 signal game_ended()
 signal game_error(what)
+signal noray_connected
 
 # Callback from SceneTree.
 func _player_connected(id):
@@ -40,10 +42,15 @@ func _player_disconnected(id):
 
 
 # Callback from SceneTree, only for clients (not server).
-func _connected_ok():
+func _connected_ok_local():
 	# We just connected to a server
 	connection_succeeded.emit()
 
+func _connected_ok_noray():
+	Noray.register_host()
+	await Noray.on_pid
+	await Noray.register_remote()
+	noray_connected.emit()
 
 # Callback from SceneTree, only for clients (not server).
 func _server_disconnected():
@@ -77,18 +84,30 @@ func load_world():
 	get_tree().get_root().add_child(world)
 	get_tree().get_root().get_node("Lobby").hide()
 
-func host_game(new_player_name):
+func host_game_local(new_player_name):
 	player_name = new_player_name
 	peer = ENetMultiplayerPeer.new()
 	peer.create_server(DEFAULT_PORT, MAX_PEERS)
 	multiplayer.multiplayer_peer = peer
+	is_host = true
 
-func join_game(ip, new_player_name):
+func host_game_noray(new_player_name):
+	player_name = new_player_name
+	peer = ENetMultiplayerPeer.new()
+	peer.create_server(Noray.local_port, MAX_PEERS)
+	multiplayer.multiplayer_peer = peer
+	is_host = true
+
+func join_game_local(ip, new_player_name):
 	player_name = new_player_name
 	peer = ENetMultiplayerPeer.new()
 	peer.create_client(ip, DEFAULT_PORT)
 	multiplayer.multiplayer_peer = peer
 
+func join_game_noray(oid, new_player_name):
+	player_name = new_player_name
+	Noray.connect_nat(oid)
+	external_oid = oid
 
 func get_player_list():
 	return players.values()
@@ -126,8 +145,59 @@ func end_game():
 
 
 func _ready():
+	Noray.on_connect_to_host.connect(_connected_ok_noray)
+	Noray.on_connect_nat.connect(handle_nat_connection)
+	Noray.on_connect_relay.connect(handle_relay_connection)
+	
+	Noray.connect_to_host(NORAY_ADDRESS, DEFAULT_PORT)
+	
 	multiplayer.peer_connected.connect(_player_connected)
 	multiplayer.peer_disconnected.connect(_player_disconnected)
-	multiplayer.connected_to_server.connect(_connected_ok)
+	multiplayer.connected_to_server.connect(_connected_ok_local)
 	multiplayer.connection_failed.connect(_connected_fail)
 	multiplayer.server_disconnected.connect(_server_disconnected)
+
+func handle_nat_connection(address, port):
+	var err = await connect_to_server(address, port)
+	
+	if err != OK && !is_host:
+		print("NAT failed, using relay")
+		Noray.connect_relay(external_oid)
+		err = OK
+	
+	return err
+
+func handle_relay_connection(address, port):
+	return await connect_to_server(address, port)
+
+func connect_to_server(address, port):
+	var err = OK
+	
+	if !is_host:
+		var udp = PacketPeerUDP.new()
+		udp.bind(Noray.local_port)
+		udp.set_dest_address(address, port)
+		
+		err = await PacketHandshake.over_packet_peer(udp)
+		udp.close()
+		
+		if err != OK:
+			if err != ERR_BUSY:
+				print("Handshake failed")
+				return err
+		else:
+			print("Handshake success")
+		
+		peer = ENetMultiplayerPeer.new()
+		err = peer.create_client(address, port, 0, 0, 0, Noray.local_port)
+		
+		if err != OK:
+			return err
+		
+		multiplayer.multiplayer_peer = peer
+		
+		return OK
+	else:
+		err = await PacketHandshake.over_enet(multiplayer.multiplayer_peer.host, address, port)
+	
+	return err

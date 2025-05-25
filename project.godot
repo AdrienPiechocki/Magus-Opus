@@ -18,6 +18,12 @@ config/icon="res://Graphics/icon.svg"
 [autoload]
 
 GameManager="*res://Scripts/GameManager.gd"
+Noray="*res://addons/netfox.noray/noray.gd"
+PacketHandshake="*res://addons/netfox.noray/packet-handshake.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/netfox.internals/plugin.cfg", "res://addons/netfox.noray/plugin.cfg")
 
 [global_group]
 
