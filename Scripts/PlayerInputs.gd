@@ -1,19 +1,33 @@
 extends Node
 
-@export
-var motion = Vector3()
+@export var motion:Vector3 = Vector3.ZERO
+@export var jumping:bool = false
 
 @onready var camera = $"../head/Camera3D"
 @onready var head = $"../head"
 var mouse_sensivity:float = 0.02
+var movement_dir:Vector3
 
-func update():
+func update(delta: float):
 	
+	#handle horizontal movement
 	var m = Input.get_vector("left", "right", "forward", "backward")
-	var movement_dir = get_parent().get_node("head").basis * Vector3(m.x, 0, m.y)
-
+	movement_dir.x = m.x
+	movement_dir.z = m.y
+	
+	#handle gravity
+	if not get_parent().is_on_floor():
+		movement_dir.y -= 20 * delta
+	
+	#handle jump
+	if Input.is_action_pressed("jump") and get_parent().is_on_floor():
+		movement_dir.y = 2.5
+	
+	#movment based on camera orientation
+	movement_dir = head.basis * movement_dir
+	
 	motion = movement_dir
-
+	
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion && camera.current:
 		head.rotate_y(-event.relative.x * mouse_sensivity)

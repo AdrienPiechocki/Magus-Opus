@@ -1,7 +1,6 @@
 extends CharacterBody3D
 
-var speed:float = 4.0
-var gravity:float = 8.0
+var speed:float = 6.0
 
 @export var synced_position := Vector3()
 
@@ -9,6 +8,7 @@ var gravity:float = 8.0
 @onready var inputs = $Inputs
 
 var flag:bool = true
+var jumping:bool = false
 
 func _ready() -> void:
 	position = synced_position
@@ -27,20 +27,26 @@ func _process(_delta: float) -> void:
 func set_player_name():
 	label.text = str(GameManager.players[int(name)])
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:	
+	#gravity = calcGravity()
 	if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
 		# The client which this player represent will update the controls state, and notify it to everyone.
-		inputs.update()
-
+		inputs.update(delta)
+			
 	if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
 		# The server updates the position that will be notified to the clients.
 		synced_position = position
 	else:
 		# The client simply updates the position to the last known one.
 		position = synced_position
-		
+	
+	#handle movement
 	velocity = inputs.motion * speed
-	if !is_on_floor():
-		velocity.y -= gravity
+
+	#handle sprint / player speed
+	if Input.is_action_pressed("sprint") and is_on_floor():
+		speed = 10
+	elif Input.is_action_just_released("sprint"):
+		speed = 6
 		
 	move_and_slide()
