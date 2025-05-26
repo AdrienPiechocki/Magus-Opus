@@ -1,29 +1,24 @@
 [gd_scene load_steps=17 format=3 uid="uid://c2hga5cenvr6p"]
 
 [ext_resource type="Script" uid="uid://bqp2k3u1nrftl" path="res://Scripts/Player.gd" id="1_5wxv7"]
+[ext_resource type="Material" uid="uid://olgu1usxguoa" path="res://Graphics/materials/Player.tres" id="2_3vpsw"]
 [ext_resource type="Script" uid="uid://yw180iquco87" path="res://Scripts/SpriteManager.gd" id="3_y5hcb"]
-[ext_resource type="Texture2D" uid="uid://bdw3ul5g2f4ke" path="res://Graphics/textures/GuardNorth.png" id="4_2nftw"]
-[ext_resource type="Texture2D" uid="uid://cxvd0gyeynn55" path="res://Graphics/textures/GuardNE.png" id="5_2xbkd"]
-[ext_resource type="Texture2D" uid="uid://b8etw876tpi8s" path="res://Graphics/textures/GuardEast.png" id="6_3vpsw"]
-[ext_resource type="Texture2D" uid="uid://dxinsug0pk000" path="res://Graphics/textures/GuardSE.png" id="7_m62uw"]
-[ext_resource type="Texture2D" uid="uid://c0s0xl2xv0yqn" path="res://Graphics/textures/GuardSouth.png" id="8_b30ri"]
-[ext_resource type="Texture2D" uid="uid://njgnvya7tcq0" path="res://Graphics/textures/GuardSW.png" id="9_ms580"]
-[ext_resource type="Texture2D" uid="uid://bdam4uoo3aocs" path="res://Graphics/textures/GuardWest.png" id="10_q7l0e"]
-[ext_resource type="Texture2D" uid="uid://dm5rgqysousaa" path="res://Graphics/textures/GuardNW.png" id="11_0fs2y"]
+[ext_resource type="Texture2D" uid="uid://dgl8gx7okx4i2" path="res://Graphics/textures/Player/Idle/Player_N.png" id="4_3vpsw"]
+[ext_resource type="Texture2D" uid="uid://hit88oijrjag" path="res://Graphics/textures/Player/Idle/Player_NE.png" id="5_m62uw"]
+[ext_resource type="Texture2D" uid="uid://hi2p7pykdhvy" path="res://Graphics/textures/Player/Idle/Player_E.png" id="6_b30ri"]
+[ext_resource type="Texture2D" uid="uid://swhlitga41c0" path="res://Graphics/textures/Player/Idle/Player_SE.png" id="7_ms580"]
+[ext_resource type="Texture2D" uid="uid://bopwabtmmtyah" path="res://Graphics/textures/Player/Idle/Player_S.png" id="8_q7l0e"]
+[ext_resource type="Texture2D" uid="uid://bboo52adakguu" path="res://Graphics/textures/Player/Idle/Player_SW.png" id="9_0fs2y"]
+[ext_resource type="Texture2D" uid="uid://c7drmwqaa3mqx" path="res://Graphics/textures/Player/Idle/Player_W.png" id="10_wphcr"]
+[ext_resource type="Texture2D" uid="uid://cpd8dkwmxyte8" path="res://Graphics/textures/Player/Idle/Player_NW.png" id="11_and0b"]
 [ext_resource type="Script" uid="uid://c2s40v7gla3u6" path="res://Scripts/PlayerInputs.gd" id="12_3vpsw"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_5wxv7"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0vlgb"]
-resource_local_to_scene = true
-transparency = 1
-albedo_texture = ExtResource("4_2nftw")
-billboard_mode = 2
-
 [sub_resource type="QuadMesh" id="QuadMesh_y5hcb"]
 resource_local_to_scene = true
-material = SubResource("StandardMaterial3D_0vlgb")
-size = Vector2(1, 2)
+material = ExtResource("2_3vpsw")
+size = Vector2(2, 2)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2xbkd"]
 properties/0/path = NodePath(".:synced_position")
@@ -48,14 +43,14 @@ shape = SubResource("CapsuleShape3D_5wxv7")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("QuadMesh_y5hcb")
 script = ExtResource("3_y5hcb")
-North = ExtResource("4_2nftw")
-NorthEast = ExtResource("5_2xbkd")
-East = ExtResource("6_3vpsw")
-SouthEast = ExtResource("7_m62uw")
-South = ExtResource("8_b30ri")
-SouthWest = ExtResource("9_ms580")
-West = ExtResource("10_q7l0e")
-NorthWest = ExtResource("11_0fs2y")
+North = ExtResource("4_3vpsw")
+NorthEast = ExtResource("5_m62uw")
+East = ExtResource("6_b30ri")
+SouthEast = ExtResource("7_ms580")
+South = ExtResource("8_q7l0e")
+SouthWest = ExtResource("9_0fs2y")
+West = ExtResource("10_wphcr")
+NorthWest = ExtResource("11_and0b")
 
 [node name="head" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)

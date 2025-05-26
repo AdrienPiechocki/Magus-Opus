@@ -24,7 +24,6 @@ signal connection_failed()
 signal connection_succeeded()
 signal game_ended()
 signal game_error(what)
-signal noray_connected
 
 # Callback from SceneTree.
 func _player_connected(id):
@@ -51,7 +50,6 @@ func _connected_ok_noray():
 	Noray.register_host()
 	await Noray.on_pid
 	await Noray.register_remote()
-	noray_connected.emit()
 
 # Callback from SceneTree, only for clients (not server).
 func _server_disconnected():
@@ -94,6 +92,7 @@ func load_world():
 	get_tree().get_root().get_node("Lobby").hide()
 
 func host_game_local(new_player_name):
+	#TODO : if server already created -> return error
 	player_name = new_player_name
 	peer.create_server(DEFAULT_PORT, MAX_PEERS)
 	multiplayer.multiplayer_peer = peer
@@ -174,7 +173,10 @@ func handle_nat_connection(address, port):
 	return err
 
 func handle_relay_connection(address, port):
-	return await connect_to_server(address, port)
+	var err = await connect_to_server(address, port)
+	if err != OK && !is_host:
+		game_error.emit("Couldn't connect")
+	return err
 
 func connect_to_server(address, port):
 	var err = OK

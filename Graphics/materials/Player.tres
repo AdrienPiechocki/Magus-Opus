@@ -1,6 +1,6 @@
 [gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://olgu1usxguoa"]
 
-[ext_resource type="Texture2D" uid="uid://bdw3ul5g2f4ke" path="res://Graphics/textures/GuardNorth.png" id="1_nvwwd"]
+[ext_resource type="Texture2D" uid="uid://dgl8gx7okx4i2" path="res://Graphics/textures/Player/Idle/Player_N.png" id="1_nvwwd"]
 
 [resource]
 resource_local_to_scene = true
