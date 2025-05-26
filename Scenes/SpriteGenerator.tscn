@@ -14,4 +14,4 @@ projection = 1
 size = 2.0
 
 [node name="Adventurer" parent="." instance=ExtResource("1_rkwvs")]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0, 1.25, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
