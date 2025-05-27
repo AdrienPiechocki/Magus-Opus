@@ -1,24 +1,28 @@
 extends CharacterBody3D
 
-var speed:float = 6.0
+var speed:float
 
 @export var synced_position := Vector3()
 
 @onready var label = $Label3D
 @onready var inputs = $Inputs
+@onready var camera = $head/Camera3D
 
-var flag:bool = true
-var jumping:bool = false
+var is_name_set:bool = false
+
+var bob_time:float = 0.0
+var idle_bob_speed:float = 3.0
+var idle_bob_amount:float = 0.02
 
 func _ready() -> void:
 	position = synced_position
 	if str(name).is_valid_int():
 		get_node("Inputs/InputSynchronizer").set_multiplayer_authority(str(name).to_int())
-	$head/Camera3D.current = get_node("Inputs/InputSynchronizer").is_multiplayer_authority()
+	camera.current = get_node("Inputs/InputSynchronizer").is_multiplayer_authority()
 
 func _process(_delta: float) -> void:
-	if not GameManager.get_player_list().is_empty() and flag:
-		flag = false
+	if not GameManager.get_player_list().is_empty() and not is_name_set:
+		is_name_set = true
 		for player in get_tree().get_nodes_in_group("Player"):
 			if player.name != name:
 				set_player_name.rpc_id(int(player.name))
@@ -32,7 +36,8 @@ func _physics_process(delta: float) -> void:
 	if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
 		# The client which this player represent will update the controls state, and notify it to everyone.
 		inputs.update(delta)
-			
+		camera_bob(delta)
+		
 	if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
 		# The server updates the position that will be notified to the clients.
 		synced_position = position
@@ -40,13 +45,20 @@ func _physics_process(delta: float) -> void:
 		# The client simply updates the position to the last known one.
 		position = synced_position
 	
+	#handle sprint / player speed
+	speed = (14 if Input.is_action_pressed("sprint") else 7)
+	
 	#handle movement
 	velocity = inputs.motion * speed
-
-	#handle sprint / player speed
-	if Input.is_action_pressed("sprint") and is_on_floor():
-		speed = 10
-	elif Input.is_action_just_released("sprint"):
-		speed = 6
-		
+	
 	move_and_slide()
+
+
+func camera_bob(delta:float):
+	if is_on_floor() and velocity.length() > 0:
+		bob_time += delta * (22 if Input.is_action_pressed("sprint") else 12)
+		
+		camera.position.y = sin(bob_time) * (0.08 if Input.is_action_pressed("sprint") else 0.06)
+	else:
+		bob_time += delta * idle_bob_speed
+		camera.position.y = sin(bob_time) * idle_bob_amount

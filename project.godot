@@ -75,3 +75,4 @@ sprint={
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
+environment/volumetric_fog/volume_size=256

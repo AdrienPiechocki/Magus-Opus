@@ -1,19 +1,19 @@
 [gd_scene load_steps=2 format=3 uid="uid://b07vxvhs3quh8"]
 
-[ext_resource type="PackedScene" uid="uid://dxld8aybo6hic" path="res://Graphics/meshes/Adventurer.fbx" id="1_e3rpl"]
+[ext_resource type="PackedScene" uid="uid://dldtcmjmpl6xq" path="res://Graphics/meshes/Adventurer.fbx" id="1_e3rpl"]
 
 [node name="Adventurer" instance=ExtResource("1_e3rpl")]
 
-[node name="Adventurer_Feet" parent="CharacterArmature/Skeleton3D" index="0"]
+[node name="Adventurer_Body" parent="CharacterArmature/Skeleton3D" index="0"]
 layers = 2
 
-[node name="Adventurer_Legs" parent="CharacterArmature/Skeleton3D" index="1"]
+[node name="Adventurer_Feet" parent="CharacterArmature/Skeleton3D" index="1"]
 layers = 2
 
-[node name="Adventurer_Body" parent="CharacterArmature/Skeleton3D" index="2"]
+[node name="Adventurer_Head" parent="CharacterArmature/Skeleton3D" index="2"]
 layers = 2
 
-[node name="Adventurer_Head" parent="CharacterArmature/Skeleton3D" index="3"]
+[node name="Adventurer_Legs" parent="CharacterArmature/Skeleton3D" index="3"]
 layers = 2
 
 [node name="Backpack" parent="CharacterArmature/Skeleton3D" index="4"]

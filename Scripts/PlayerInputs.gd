@@ -1,7 +1,7 @@
 extends Node
 
 @export var motion:Vector3 = Vector3.ZERO
-@export var jumping:bool = false
+var cooldown:float = 0.5
 
 @onready var camera = $"../head/Camera3D"
 @onready var head = $"../head"
@@ -17,11 +17,15 @@ func update(delta: float):
 	
 	#handle gravity
 	if not get_parent().is_on_floor():
-		movement_dir.y -= 20 * delta
+		movement_dir.y -= 10 * delta
 	
 	#handle jump
-	if Input.is_action_pressed("jump") and get_parent().is_on_floor():
-		movement_dir.y = 2.5
+	if Input.is_action_pressed("jump") and get_parent().is_on_floor() and cooldown <= 0:
+		cooldown = 0.5
+		movement_dir.y = 1.5
+	#jump cooldown
+	if cooldown > 0:
+		cooldown -= delta
 	
 	#movment based on camera orientation
 	movement_dir = head.basis * movement_dir
