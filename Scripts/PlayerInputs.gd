@@ -3,8 +3,9 @@ extends Node
 @export var motion:Vector3 = Vector3.ZERO
 var cooldown:float = 0.5
 
-@onready var camera = $"../head/Camera3D"
-@onready var head = $"../head"
+@onready var camera = $"../Head/Camera3D"
+@onready var head = $"../Head"
+
 var mouse_sensivity:float = 0.02
 var movement_dir:Vector3
 
@@ -34,7 +35,10 @@ func update(delta: float):
 	
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion && camera.current:
-		head.rotate_y(-event.relative.x * mouse_sensivity)
+		rotate_head.rpc(event)
 		camera.rotate_x(-event.relative.y * mouse_sensivity)
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-80), deg_to_rad(80))
-	
+
+@rpc("any_peer", "call_local")
+func rotate_head(event:InputEvent):
+	head.rotate_y(-event.relative.x * mouse_sensivity)

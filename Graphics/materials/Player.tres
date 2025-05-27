@@ -1,9 +1,10 @@
 [gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://olgu1usxguoa"]
 
-[ext_resource type="Texture2D" uid="uid://dgl8gx7okx4i2" path="res://Graphics/textures/Player/Idle/Player_N.png" id="1_nvwwd"]
+[ext_resource type="Texture2D" uid="uid://bsu3scropktpl" path="res://Graphics/textures/Player/Idle/Player_N.png" id="1_nvwwd"]
 
 [resource]
 resource_local_to_scene = true
 transparency = 1
+diffuse_mode = 1
 albedo_texture = ExtResource("1_nvwwd")
 billboard_mode = 2

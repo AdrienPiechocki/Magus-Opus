@@ -4,14 +4,18 @@ var speed:float
 
 @export var synced_position := Vector3()
 
-@onready var label = $Label3D
+@onready var label = $NameTag
 @onready var inputs = $Inputs
-@onready var camera = $head/Camera3D
+@onready var camera = $Head/Camera3D
+@onready var head = $Head
+@onready var lantern = $Head/Lantern
+@onready var sprite = $Sprite
 
+var lantern_lit:bool = false
 var is_name_set:bool = false
 
 var bob_time:float = 0.0
-var idle_bob_speed:float = 3.0
+var idle_bob_speed:float = 0.3
 var idle_bob_amount:float = 0.02
 
 func _ready() -> void:
@@ -19,17 +23,40 @@ func _ready() -> void:
 	if str(name).is_valid_int():
 		get_node("Inputs/InputSynchronizer").set_multiplayer_authority(str(name).to_int())
 	camera.current = get_node("Inputs/InputSynchronizer").is_multiplayer_authority()
-
-func _process(_delta: float) -> void:
+	sprite.hide()
+	
+func _process(delta: float) -> void:
+	#Set player nametag:
 	if not GameManager.get_player_list().is_empty() and not is_name_set:
 		is_name_set = true
 		for player in get_tree().get_nodes_in_group("Player"):
 			if player.name != name:
 				set_player_name.rpc_id(int(player.name))
+				set_visibility.rpc_id(int(player.name))
+	#Manage lantern
+	if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
+		if Input.is_action_just_pressed("light"):
+			toggle_lantern.rpc()
+	set_lantern.rpc(delta)
+	
+@rpc("any_peer", "call_local")
+func toggle_lantern():
+	lantern_lit = !lantern_lit
 
+@rpc("any_peer", "call_local")
+func set_lantern(delta:float):	
+	if lantern_lit and lantern.light_energy < 1:
+		lantern.light_energy += delta
+	if !lantern_lit and lantern.light_energy > 0:
+		lantern.light_energy -= delta
+	
 @rpc("any_peer", "call_local")
 func set_player_name():
 	label.text = str(GameManager.players[int(name)])
+
+@rpc("any_peer", "call_local")
+func set_visibility():
+	sprite.show()
 
 func _physics_process(delta: float) -> void:	
 	#gravity = calcGravity()
@@ -44,7 +71,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		# The client simply updates the position to the last known one.
 		position = synced_position
-	
+		
 	#handle sprint / player speed
 	speed = (14 if Input.is_action_pressed("sprint") else 7)
 	

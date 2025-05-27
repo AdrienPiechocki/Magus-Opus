@@ -26,6 +26,8 @@ var pos:Vector3
 
 var currentSide:int
 
+@onready var head = $"../Head"
+
 func _ready() -> void:
 	multiplayer.allow_object_decoding = true
 	mat = mesh.surface_get_material(0).duplicate()
@@ -75,7 +77,7 @@ func set_texture(player, order:Array):
 
 @rpc("any_peer", "call_local")
 func update():
-	angle = round_to_dec(get_parent().get_node("head").rotation_degrees.y, 1)
+	angle = round_to_dec(head.rotation_degrees.y, 1)
 	set_orientation.rpc(angle)
 	
 func round_to_dec(num, digit):

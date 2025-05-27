@@ -126,18 +126,18 @@ func begin_game():
 	load_world.rpc()
 	
 	var world = get_tree().get_root().get_node("World")
-	var player_scene = load("res://Prefabs/player.tscn")
+	var player_scene = load("res://Prefabs/Players/player.tscn")
 	
 	var spawns := [1]
 	for p: int in players:
 		spawns.append(p)
 
 	for p_id: int in spawns:
-		var spawn_pos: Vector3 = world.get_node("SubViewportContainer").get_node("SubViewport").get_node("Spawn").position
+		var spawn_pos: Vector3 = world.get_node("Spawn").position
 		var player = player_scene.instantiate()
 		player.synced_position = spawn_pos
 		player.name = str(p_id)
-		world.get_node("SubViewportContainer").get_node("SubViewport").get_node("Players").add_child(player, true)
+		world.get_node("Players").add_child(player, true)
 		print("spawned player with id: ", player.name)
 
 func end_game():
@@ -216,6 +216,6 @@ func is_multiplayer():
 	else:
 		return false
 
-@rpc("any_peer", "reliable")
+@rpc("any_peer")
 func _is_multiplayer():
 	server_started = multiplayer.multiplayer_peer != null

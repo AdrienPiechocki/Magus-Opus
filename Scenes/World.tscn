@@ -1,68 +1,86 @@
-[gd_scene load_steps=7 format=3 uid="uid://glwqiwjnwmpc"]
+[gd_scene load_steps=12 format=3 uid="uid://glwqiwjnwmpc"]
 
-[ext_resource type="PackedScene" uid="uid://cwng1l8d3835m" path="res://Prefabs/npc.tscn" id="2_j0p05"]
-[ext_resource type="PackedScene" uid="uid://b07vxvhs3quh8" path="res://Prefabs/adventurer.tscn" id="3_5nsto"]
-[ext_resource type="PackedScene" uid="uid://bnx47e30r6hws" path="res://Prefabs/level.tscn" id="3_p70al"]
+[ext_resource type="Shader" uid="uid://om51lt5o24gl" path="res://Graphics/Shaders/Sky.gdshader" id="1_5nsto"]
+[ext_resource type="Texture2D" uid="uid://cjhdq0dp885un" path="res://Graphics/textures/moon.png" id="2_gjpho"]
+[ext_resource type="PackedScene" uid="uid://cwng1l8d3835m" path="res://Prefabs/NPCs/npc.tscn" id="2_j0p05"]
+[ext_resource type="PackedScene" uid="uid://bnx47e30r6hws" path="res://Prefabs/World/level.tscn" id="3_p70al"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_j0p05"]
+[sub_resource type="Curve" id="Curve_5nsto"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.195946, 0.966292), 0.0, 0.0, 0, 0, Vector2(0.736486, 0.662921), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_gjpho"]
+curve = SubResource("Curve_5nsto")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_p70al"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_45d1s"]
+seamless = true
+noise = SubResource("FastNoiseLite_p70al")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5nsto"]
+shader = ExtResource("1_5nsto")
+shader_parameter/cloud_shape_sampler = SubResource("NoiseTexture2D_45d1s")
+shader_parameter/cloud_noise_sampler = SubResource("NoiseTexture2D_45d1s")
+shader_parameter/cloud_curves = SubResource("CurveTexture_gjpho")
+shader_parameter/clouds_samples = 16
+shader_parameter/shadow_sample = 4
+shader_parameter/clouds_density = 0.5
+shader_parameter/clouds_scale = 1.0
+shader_parameter/clouds_smoothness = 0.035
+shader_parameter/clouds_light_color = Color(0.894922, 0.894922, 0.894922, 1)
+shader_parameter/clouds_shadow_intensity = 3.0
+shader_parameter/high_clouds_density = 0.0
+shader_parameter/top_color = Color(0.0300172, 0.0294941, 0.140697, 1)
+shader_parameter/bottom_color = Color(0, 0, 0.180392, 1)
+shader_parameter/sun_scatter = Color(0, 0, 0, 1)
+shader_parameter/astro_tint = Color(0.678382, 0.673414, 0.578538, 1)
+shader_parameter/astro_sampler = ExtResource("2_gjpho")
+shader_parameter/astro_scale = 5.0
+shader_parameter/astro_intensity = 1.5
+shader_parameter/stars_intensity = 5.0
+shader_parameter/shooting_stars_intensity = 0.0
+shader_parameter/shooting_star_tint = Color(0, 0, 0, 1)
 
 [sub_resource type="Sky" id="Sky_5nsto"]
-sky_material = SubResource("ProceduralSkyMaterial_j0p05")
+sky_material = SubResource("ShaderMaterial_5nsto")
 
 [sub_resource type="Environment" id="Environment_jjvhh"]
 background_mode = 2
 background_energy_multiplier = 1.5
 sky = SubResource("Sky_5nsto")
-ambient_light_source = 3
-ambient_light_color = Color(1, 1, 1, 1)
-reflected_light_source = 1
-tonemap_mode = 2
-glow_enabled = true
+ambient_light_source = 1
+sdfgi_read_sky_light = false
+fog_mode = 1
+fog_density = 1.0
+fog_sky_affect = 0.1
 volumetric_fog_enabled = true
-volumetric_fog_density = 0.01
-volumetric_fog_sky_affect = 0.5
+volumetric_fog_sky_affect = 0.8
 
 [node name="World" type="Node3D"]
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
-texture_filter = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-stretch = true
-stretch_shrink = 3
-
-[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
-handle_input_locally = false
-size = Vector2i(384, 216)
-render_target_update_mode = 4
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewportContainer/SubViewport"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_jjvhh")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport"]
-transform = Transform3D(1, 0, 0, 0, 0.927184, 0.374607, 0, -0.374607, 0.927184, 0, 2, 0)
-light_energy = 2.0
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.848048, 0.529919, 0, -0.529919, 0.848048, 0, 2, 0)
+light_color = Color(0.3, 0.3, 0.3, 1)
 light_volumetric_fog_energy = 2.0
 shadow_enabled = true
 shadow_blur = 5.0
+directional_shadow_mode = 0
 
-[node name="Level" parent="SubViewportContainer/SubViewport" instance=ExtResource("3_p70al")]
+[node name="Level" parent="." instance=ExtResource("3_p70al")]
 
-[node name="NPC" parent="SubViewportContainer/SubViewport/Level" instance=ExtResource("2_j0p05")]
+[node name="NPC" parent="Level" instance=ExtResource("2_j0p05")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1, 0)
 orientation = 45.0
 
-[node name="Adventurer" parent="SubViewportContainer/SubViewport/Level" instance=ExtResource("3_5nsto")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 10)
-
-[node name="Spawn" type="Node3D" parent="SubViewportContainer/SubViewport"]
+[node name="Spawn" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
-[node name="Players" type="Node3D" parent="SubViewportContainer/SubViewport"]
+[node name="Players" type="Node3D" parent="."]
 
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="SubViewportContainer/SubViewport"]
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://c2hga5cenvr6p")
 spawn_path = NodePath("../Players")

@@ -1,6 +1,6 @@
 extends CharacterBody3D
 
-@onready var head = $head
+@onready var head = $Head
 
 @export_range(-180, 180) var orientation:float
 
