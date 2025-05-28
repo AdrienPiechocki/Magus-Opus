@@ -211,7 +211,7 @@ func connect_to_server(address, port):
 	
 func _process(_delta: float) -> void:
 	if not players.keys().is_empty():
-		_is_multiplayer.rpc_id(players.keys()[0])
+		_is_multiplayer.rpc()
 	else:
 		server_started = false
 

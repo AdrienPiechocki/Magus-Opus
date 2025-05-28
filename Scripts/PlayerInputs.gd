@@ -10,7 +10,7 @@ var mouse_sensivity:float = 0.02
 var movement_dir:Vector3
 
 func update(delta: float):
-	
+
 	#handle horizontal movement
 	var m = Input.get_vector("left", "right", "forward", "backward")
 	movement_dir.x = m.x
@@ -23,7 +23,7 @@ func update(delta: float):
 	#handle jump
 	if Input.is_action_pressed("jump") and get_parent().is_on_floor() and cooldown <= 0:
 		cooldown = 0.5
-		movement_dir.y = 1.5
+		movement_dir.y = (1.9 if Input.is_action_pressed("sprint") else 2.0)
 	#jump cooldown
 	if cooldown > 0:
 		cooldown -= delta

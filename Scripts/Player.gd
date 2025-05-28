@@ -10,12 +10,15 @@ var speed:float
 @onready var head = $Head
 @onready var lantern = $Head/Lantern
 @onready var sprite = $Sprite
+@onready var hands = $Hands
+@onready var left_hand = $Hands/LeftHand
+@onready var right_hand = $Hands/RightHand
 
 var lantern_lit:bool = false
 var is_name_set:bool = false
 
 var bob_time:float = 0.0
-var idle_bob_speed:float = 0.3
+var idle_bob_speed:float = 3
 var idle_bob_amount:float = 0.02
 var flicker_amount:float = 0.2
 
@@ -26,7 +29,7 @@ func _ready() -> void:
 	camera.current = get_node("Inputs/InputSynchronizer").is_multiplayer_authority()
 	sprite.hide()
 	
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	#Set player nametag:
 	if not GameManager.get_player_list().is_empty() and not is_name_set:
 		is_name_set = true
@@ -34,11 +37,7 @@ func _process(delta: float) -> void:
 			if player.name != name:
 				set_player_name.rpc_id(int(player.name))
 				set_visibility.rpc_id(int(player.name))
-	#Manage lantern
-	if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
-		if Input.is_action_just_pressed("light"):
-			toggle_lantern.rpc()
-	set_lantern.rpc(delta)
+
 	
 @rpc("any_peer", "call_local")
 func toggle_lantern():
@@ -68,6 +67,10 @@ func _physics_process(delta: float) -> void:
 		# The client which this player represent will update the controls state, and notify it to everyone.
 		inputs.update(delta)
 		camera_bob(delta)
+		#Manage lantern
+		if Input.is_action_just_pressed("light"):
+			toggle_lantern.rpc()
+		set_lantern.rpc(delta)
 		
 	if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
 		# The server updates the position that will be notified to the clients.
@@ -77,8 +80,8 @@ func _physics_process(delta: float) -> void:
 		position = synced_position
 		
 	#handle sprint / player speed
-	speed = (14 if Input.is_action_pressed("sprint") else 7)
-	
+	speed = (14 if Input.is_action_pressed("sprint") and is_on_floor() else 7)
+
 	#handle movement
 	velocity = inputs.motion * speed
 	
@@ -86,10 +89,11 @@ func _physics_process(delta: float) -> void:
 
 
 func camera_bob(delta:float):
-	if is_on_floor() and velocity.length() > 0:
+	if velocity.length() > 0:
 		bob_time += delta * (22 if Input.is_action_pressed("sprint") else 12)
-		
 		camera.position.y = sin(bob_time) * (0.08 if Input.is_action_pressed("sprint") else 0.06)
+		hands.offset.y = -sin(bob_time) * (8 if Input.is_action_pressed("sprint") else 6)
 	else:
 		bob_time += delta * idle_bob_speed
 		camera.position.y = sin(bob_time) * idle_bob_amount
+		hands.offset.y = -sin(bob_time) * idle_bob_amount * 100
