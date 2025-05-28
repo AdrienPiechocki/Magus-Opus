@@ -11,12 +11,15 @@ var peer = ENetMultiplayerPeer.new()
 var is_host = false
 var external_oid = ""
 var server_started:bool = false
+@export var in_game:bool = false
 
 # Name for my player.
 var player_name = "Player"
 
 # Names for remote players in id:name format.
 var players = {}
+
+var graphics_settings = {}
 
 # Signals to let lobby GUI know what's going on.
 signal player_list_changed()
@@ -73,13 +76,13 @@ func register_player(new_player_name):
 	player_list_changed.emit()
 	print("Player ", new_player_name, " connected with ID ", id)
 
-@rpc("any_peer")
+@rpc("any_peer", "call_local", "reliable")
 func unregister_player(id):
 	players.erase(id)
-	if multiplayer.get_peers().is_empty():
+	if id == 1:
 		is_host = false
-		peer.close()
-	elif id != 1:
+		_server_disconnected()
+	else:
 		multiplayer.multiplayer_peer.disconnect_peer(id)
 	player_list_changed.emit()
 
@@ -139,8 +142,10 @@ func begin_game():
 		player.name = str(p_id)
 		world.get_node("Players").add_child(player, true)
 		print("spawned player with id: ", player.name)
+	toggle_game(true)
 
 func end_game():
+	toggle_game(false)
 	if has_node("/root/World"): # Game is in progress.
 		# End it
 		get_node("/root/World").queue_free()
@@ -148,8 +153,13 @@ func end_game():
 	game_ended.emit()
 	players.clear()
 
+@rpc("any_peer", "call_local", "reliable")
+func toggle_game(toggle:bool):
+	in_game = toggle
 
 func _ready():
+	load_config()
+	
 	Noray.on_connect_to_host.connect(_connected_ok_noray)
 	Noray.on_connect_nat.connect(handle_nat_connection)
 	Noray.on_connect_relay.connect(handle_relay_connection)
@@ -218,3 +228,28 @@ func _process(_delta: float) -> void:
 @rpc("any_peer")
 func _is_multiplayer():
 	server_started = multiplayer.multiplayer_peer != null
+
+func load_config():
+	var config = ConfigFile.new()
+	var err = config.load("user://settings.cfg")
+	#if config doesn't exist, create config
+	if err != OK:
+		create_config(config)
+
+	#load config values
+	graphics_settings["brightness"] = config.get_value("Graphics", "brightness")
+
+func create_config(config:ConfigFile):
+	#create default values
+	config.set_value("Graphics", "brightness", 0.0)
+	
+	#save config
+	config.save("user://settings.cfg")
+
+func save_config():
+	var config = ConfigFile.new()
+	for key in graphics_settings.keys():
+		config.set_value("Graphics", key, graphics_settings[key])
+	
+	#save config
+	config.save("user://settings.cfg")

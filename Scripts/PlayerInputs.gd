@@ -10,7 +10,10 @@ var mouse_sensivity:float = 0.02
 var movement_dir:Vector3
 
 func update(delta: float):
-
+	
+	if Input.is_action_pressed("menu"):
+		pass
+	
 	#handle horizontal movement
 	var m = Input.get_vector("left", "right", "forward", "backward")
 	movement_dir.x = m.x
@@ -34,7 +37,7 @@ func update(delta: float):
 	motion = movement_dir
 	
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion && camera.current:
+	if event is InputEventMouseMotion and camera.current and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_head.rpc(event)
 		camera.rotate_x(-event.relative.y * mouse_sensivity)
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-80), deg_to_rad(80))

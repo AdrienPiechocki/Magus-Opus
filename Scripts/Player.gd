@@ -13,6 +13,7 @@ var speed:float
 @onready var hands = $Hands
 @onready var left_hand = $Hands/LeftHand
 @onready var right_hand = $Hands/RightHand
+@onready var UI = $UserInterface
 
 var lantern_lit:bool = false
 var is_name_set:bool = false
@@ -28,6 +29,7 @@ func _ready() -> void:
 		get_node("Inputs/InputSynchronizer").set_multiplayer_authority(str(name).to_int())
 	camera.current = get_node("Inputs/InputSynchronizer").is_multiplayer_authority()
 	sprite.hide()
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	
 func _process(_delta: float) -> void:
 	#Set player nametag:
@@ -62,31 +64,41 @@ func set_visibility():
 	sprite.show()
 
 func _physics_process(delta: float) -> void:	
-	#gravity = calcGravity()
-	if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
-		# The client which this player represent will update the controls state, and notify it to everyone.
-		inputs.update(delta)
-		camera_bob(delta)
-		#Manage lantern
-		if Input.is_action_just_pressed("light"):
-			toggle_lantern.rpc()
-		set_lantern.rpc(delta)
+	if GameManager.in_game:
+		if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
+			# The client which this player represent will update the controls state, and notify it to everyone.
+			inputs.update(delta)
+			camera_bob(delta)
+			#Manage lantern
+			if Input.is_action_just_pressed("light"):
+				toggle_lantern.rpc()
+			set_lantern.rpc(delta)
+			
+			#Escape Menu:
+			if Input.is_action_just_released("menu"):
+				UI.visible = !UI.visible
+				toggle_mouse()
+				
+		if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
+			# The server updates the position that will be notified to the clients.
+			synced_position = position
+		else:
+			# The client simply updates the position to the last known one.
+			position = synced_position
+			
+		#handle sprint / player speed
+		speed = (14 if Input.is_action_pressed("sprint") and is_on_floor() else 7)
+
+		#handle movement
+		velocity = inputs.motion * speed
 		
-	if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
-		# The server updates the position that will be notified to the clients.
-		synced_position = position
+		move_and_slide()
+
+func toggle_mouse():
+	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	else:
-		# The client simply updates the position to the last known one.
-		position = synced_position
-		
-	#handle sprint / player speed
-	speed = (14 if Input.is_action_pressed("sprint") and is_on_floor() else 7)
-
-	#handle movement
-	velocity = inputs.motion * speed
-	
-	move_and_slide()
-
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func camera_bob(delta:float):
 	if velocity.length() > 0:

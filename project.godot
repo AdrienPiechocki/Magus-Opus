@@ -17,7 +17,7 @@ config/icon="res://Graphics/icon.svg"
 
 [autoload]
 
-GameManager="*res://Scripts/GameManager.gd"
+GameManager="*res://Prefabs/GameManager.tscn"
 Noray="*res://addons/netfox.noray/noray.gd"
 PacketHandshake="*res://addons/netfox.noray/packet-handshake.gd"
 

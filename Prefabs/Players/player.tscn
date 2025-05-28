@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://c2hga5cenvr6p"]
+[gd_scene load_steps=19 format=3 uid="uid://c2hga5cenvr6p"]
 
 [ext_resource type="Script" uid="uid://bqp2k3u1nrftl" path="res://Scripts/Player.gd" id="1_44qme"]
 [ext_resource type="Material" uid="uid://olgu1usxguoa" path="res://Graphics/materials/Player.tres" id="2_udiyv"]
@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://dv1v55jegty1g" path="res://Graphics/textures/Player/Idle/Player_NW.png" id="11_tbr1p"]
 [ext_resource type="Script" uid="uid://c2s40v7gla3u6" path="res://Scripts/PlayerInputs.gd" id="12_havlv"]
 [ext_resource type="Texture2D" uid="uid://yxmd5clogng3" path="res://Graphics/textures/Player/Hands/Dagger/Dagger_Idle.PNG" id="12_udiyv"]
+[ext_resource type="PackedScene" uid="uid://cdiokfvfbqsxh" path="res://Scenes/UserInterface.tscn" id="14_c6tfb"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_5wxv7"]
 
@@ -83,9 +84,9 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -278.0
-offset_top = -429.0
+offset_top = -416.0
 offset_right = -213.0
-offset_bottom = -286.0
+offset_bottom = -273.0
 grow_horizontal = 0
 grow_vertical = 0
 scale = Vector2(3, 3)
@@ -103,3 +104,6 @@ script = ExtResource("12_havlv")
 
 [node name="InputSynchronizer" type="MultiplayerSynchronizer" parent="Inputs"]
 replication_config = SubResource("SceneReplicationConfig_3vpsw")
+
+[node name="UserInterface" parent="." instance=ExtResource("14_c6tfb")]
+visible = false

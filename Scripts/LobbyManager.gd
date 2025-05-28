@@ -85,13 +85,12 @@ func _on_back_pressed() -> void:
 		if GameManager.is_host:
 			if not multiplayer.get_peers().is_empty():
 				for peer in multiplayer.get_peers():
-					GameManager.unregister_player(peer)
+					GameManager.unregister_player.rpc(peer)
 				multiplayer.server_disconnected.emit()
 			else:
-				GameManager.unregister_player(1)
+				GameManager.unregister_player.rpc(1)
 		else:
 			GameManager.unregister_player.rpc(multiplayer.get_unique_id())
-			GameManager.end_game()
 
 
 func refresh_lobby():
@@ -113,7 +112,8 @@ func _on_connection_failed():
 
 func _on_game_ended():
 	show()
-	$Connect.show()
+	$Choice.show()
+	$Connect.hide()
 	$Players.hide()
 	$Connect/Host.disabled = false
 	$Connect/Join.disabled = false

@@ -1,0 +1,109 @@
+[gd_scene load_steps=5 format=3 uid="uid://cdiokfvfbqsxh"]
+
+[ext_resource type="Script" uid="uid://bi2wha2ms4nmx" path="res://Scripts/UIManager.gd" id="1_ofew4"]
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_xc8ml"]
+color = Color(0.593134, 0.593134, 0.593134, 1)
+grow_begin = -7.0
+grow_end = -7.0
+thickness = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xc8ml"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ofew4"]
+bg_color = Color(0.779291, 0.779291, 0.779291, 1)
+
+[node name="UserInterface" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ofew4")
+
+[node name="Menu" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -219.0
+offset_top = -312.5
+offset_right = 219.0
+offset_bottom = 312.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Back" type="Button" parent="Menu"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -69.0
+offset_top = 50.0
+offset_right = 1.0
+offset_bottom = 81.0
+grow_horizontal = 2
+scale = Vector2(2, 2)
+text = "Back
+"
+
+[node name="Exit" type="Button" parent="Menu"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -69.0
+offset_top = -125.0
+offset_right = 1.0
+offset_bottom = -94.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(2, 2)
+text = "Exit"
+
+[node name="Settings" type="Panel" parent="Menu"]
+custom_minimum_size = Vector2(350, 300)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Brightness" type="Label" parent="Menu/Settings"]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 31.0
+offset_right = 210.0
+offset_bottom = 70.0
+theme_override_font_sizes/font_size = 24
+text = "Brightness : "
+
+[node name="BrightnessSlider" type="HSlider" parent="Menu/Settings"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.009
+offset_left = 47.0
+offset_top = 73.0
+offset_right = 298.058
+offset_bottom = 89.0
+theme_override_styles/slider = SubResource("StyleBoxLine_xc8ml")
+theme_override_styles/grabber_area = SubResource("StyleBoxFlat_xc8ml")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_ofew4")
+max_value = 0.5
+step = 0.05
+
+[connection signal="pressed" from="Menu/Back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="Menu/Exit" to="." method="_on_exit_pressed"]
+[connection signal="drag_ended" from="Menu/Settings/BrightnessSlider" to="." method="_on_brightness_slider_drag_ended"]
