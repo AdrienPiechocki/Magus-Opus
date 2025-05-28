@@ -56,7 +56,7 @@ func _server_disconnected():
 	#game_error.emit("Server disconnected")
 	peer.close()
 	end_game()
-	if is_multiplayer():
+	if server_started:
 		unregister_player(1)
 
 # Callback from SceneTree, only for clients (not server).
@@ -208,13 +208,12 @@ func connect_to_server(address, port):
 		err = await PacketHandshake.over_enet(multiplayer.multiplayer_peer.host, address, port)
 	
 	return err
-
-func is_multiplayer():
+	
+func _process(_delta: float) -> void:
 	if not players.keys().is_empty():
 		_is_multiplayer.rpc_id(players.keys()[0])
-		return server_started
 	else:
-		return false
+		server_started = false
 
 @rpc("any_peer")
 func _is_multiplayer():

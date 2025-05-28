@@ -68,7 +68,7 @@ func _on_join_pressed():
 	else:
 		GameManager.join_game_local(ip, player_name)
 		$Players/CopyOID.disabled = true
-
+	
 func _on_start_pressed():
 	GameManager.begin_game()
 
@@ -101,10 +101,6 @@ func refresh_lobby():
 	$Players/List.add_item(GameManager.get_player_name() + " (You)")
 	for p in players:
 		$Players/List.add_item(p)
-	
-	if GameManager.is_multiplayer():
-		$Players/Start.disabled = not multiplayer.is_server()
-
 
 func _on_connection_success():
 	$Connect.hide()
@@ -127,3 +123,7 @@ func _on_game_error(errtxt):
 	$ErrorDialog.popup_centered()
 	$Connect/Host.disabled = false
 	$Connect/Join.disabled = false
+
+func _process(_delta: float) -> void:
+	if GameManager.server_started:
+		$Players/Start.disabled = not multiplayer.is_server()

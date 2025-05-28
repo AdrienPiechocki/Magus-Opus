@@ -17,6 +17,7 @@ var is_name_set:bool = false
 var bob_time:float = 0.0
 var idle_bob_speed:float = 0.3
 var idle_bob_amount:float = 0.02
+var flicker_amount:float = 0.2
 
 func _ready() -> void:
 	position = synced_position
@@ -45,11 +46,14 @@ func toggle_lantern():
 
 @rpc("any_peer", "call_local")
 func set_lantern(delta:float):	
+	if lantern_lit and lantern.light_energy >= 1:
+		flicker_amount += delta * 5
+		lantern.omni_range += sin(flicker_amount) * 0.002
 	if lantern_lit and lantern.light_energy < 1:
 		lantern.light_energy += delta
 	if !lantern_lit and lantern.light_energy > 0:
 		lantern.light_energy -= delta
-	
+
 @rpc("any_peer", "call_local")
 func set_player_name():
 	label.text = str(GameManager.players[int(name)])
