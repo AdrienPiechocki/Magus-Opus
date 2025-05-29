@@ -4,34 +4,34 @@ const NORAY_ADDRESS = "tomfol.io"
 const DEFAULT_PORT = 8890
 
 # Max number of players.
-const MAX_PEERS = 3
+const MAX_PLAYERS = 4
 
 var peer = ENetMultiplayerPeer.new()
 
 var is_host = false
 var external_oid = ""
-var server_started:bool = false
+@export var server_started:bool = false
 @export var in_game:bool = false
 
 # Name for my player.
 var player_name = "Player"
 
 # Names for remote players in id:name format.
-var players = {}
+@export var players = {}
 
 var graphics_settings = {}
 
 # Signals to let lobby GUI know what's going on.
-signal player_list_changed()
+#signal player_list_changed()
 signal connection_failed()
 signal connection_succeeded()
 signal game_ended()
 signal game_error(what)
 
 # Callback from SceneTree.
-func _player_connected(id):
+func _player_connected(_id):
 	# Registration of a client beings here, tell the connected player that we are here.
-	register_player.rpc_id(id, player_name)
+	register_player.rpc(player_name)
 	
 # Callback from SceneTree.
 func _player_disconnected(id):
@@ -59,32 +59,31 @@ func _server_disconnected():
 	#game_error.emit("Server disconnected")
 	peer.close()
 	end_game()
-	if server_started:
-		unregister_player(1)
+	#if server_started:
+		#unregister_player(1)
 
 # Callback from SceneTree, only for clients (not server).
 func _connected_fail():
-	multiplayer.set_network_peer(null) # Remove peer
 	connection_failed.emit()
 
 
 # Lobby management functions.
 @rpc("any_peer")
 func register_player(new_player_name):
-	var id = multiplayer.get_remote_sender_id()
+	var id = (1 if multiplayer.get_remote_sender_id() == 0 else multiplayer.get_remote_sender_id())
 	players[id] = new_player_name
-	player_list_changed.emit()
 	print("Player ", new_player_name, " connected with ID ", id)
-
-@rpc("any_peer", "call_local", "reliable")
+	#player_list_changed.emit()
+	
+@rpc("any_peer")
 func unregister_player(id):
 	players.erase(id)
 	if id == 1:
 		is_host = false
 		_server_disconnected()
 	else:
-		multiplayer.multiplayer_peer.disconnect_peer(id)
-	player_list_changed.emit()
+		multiplayer.disconnect_peer(id)
+	#player_list_changed.emit()
 
 
 @rpc("call_local")
@@ -97,21 +96,27 @@ func load_world():
 func host_game_local(new_player_name):
 	#TODO : if server already created -> return error
 	player_name = new_player_name
-	peer.create_server(DEFAULT_PORT, MAX_PEERS)
+	var err = peer.create_server(DEFAULT_PORT, MAX_PLAYERS)
+	if err != OK:
+		game_error.emit("Can't create server")
+		end_game()
+		return
 	multiplayer.multiplayer_peer = peer
 	is_host = true
-
+	register_player(player_name)
+	
 func host_game_noray(new_player_name):
 	player_name = new_player_name
-	peer.create_server(Noray.local_port, MAX_PEERS)
+	peer.create_server(Noray.local_port, MAX_PLAYERS)
 	multiplayer.multiplayer_peer = peer
 	is_host = true
+	register_player(player_name)
 	
 func join_game_local(ip, new_player_name):
 	player_name = new_player_name
 	peer.create_client(ip, DEFAULT_PORT)
 	multiplayer.multiplayer_peer = peer
-
+	
 func join_game_noray(oid, new_player_name):
 	player_name = new_player_name
 	Noray.connect_nat(oid)
@@ -131,16 +136,16 @@ func begin_game():
 	var world = get_tree().get_root().get_node("World")
 	var player_scene = load("res://Prefabs/Players/player.tscn")
 	
-	var spawns := [1]
-	for p: int in players:
+	var spawns:Array = []
+	for p: int in players.keys():
 		spawns.append(p)
-
+	
 	for p_id: int in spawns:
 		var spawn_pos: Vector3 = world.get_node("Spawn").position
 		var player = player_scene.instantiate()
 		player.synced_position = spawn_pos
 		player.name = str(p_id)
-		world.get_node("Players").add_child(player, true)
+		world.get_node("Players").add_child(player)
 		print("spawned player with id: ", player.name)
 	toggle_game(true)
 
@@ -153,7 +158,6 @@ func end_game():
 	game_ended.emit()
 	players.clear()
 
-@rpc("any_peer", "call_local", "reliable")
 func toggle_game(toggle:bool):
 	in_game = toggle
 
@@ -218,16 +222,21 @@ func connect_to_server(address, port):
 		err = await PacketHandshake.over_enet(multiplayer.multiplayer_peer.host, address, port)
 	
 	return err
-	
+
 func _process(_delta: float) -> void:
+	if get_player_list().size() > MAX_PLAYERS:
+		if players.keys()[-1] == multiplayer.get_unique_id():
+			unregister_player.rpc(multiplayer.get_unique_id())
+			game_error.emit("Server full")
+			end_game() 
+			
 	if not players.keys().is_empty():
-		_is_multiplayer.rpc()
+		server_started = true
 	else:
 		server_started = false
 
-@rpc("any_peer")
-func _is_multiplayer():
-	server_started = multiplayer.multiplayer_peer != null
+
+### CONFIG MANAGMENT :
 
 func load_config():
 	var config = ConfigFile.new()

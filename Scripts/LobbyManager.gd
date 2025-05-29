@@ -6,11 +6,11 @@ func _ready():
 	# Called every time the node is added to the scene.
 	GameManager.connection_failed.connect(_on_connection_failed)
 	GameManager.connection_succeeded.connect(_on_connection_success)
-	GameManager.player_list_changed.connect(refresh_lobby)
+	#GameManager.player_list_changed.connect(refresh_lobby)
 	GameManager.game_ended.connect(_on_game_ended)
 	GameManager.game_error.connect(_on_game_error)
 	
-	# Set the player name according to the system username. Fallback to the path.
+	# Set the player name according to the system username
 	if OS.has_environment("USERNAME"):
 		$Choice/Name.text = OS.get_environment("USERNAME")
 
@@ -48,7 +48,6 @@ func _on_host_pressed():
 	else:
 		GameManager.host_game_local(player_name)
 		$Players/CopyOID.disabled = true
-	refresh_lobby()
 
 
 func _on_join_pressed():
@@ -85,19 +84,18 @@ func _on_back_pressed() -> void:
 		if GameManager.is_host:
 			if not multiplayer.get_peers().is_empty():
 				for peer in multiplayer.get_peers():
-					GameManager.unregister_player.rpc(peer)
+					GameManager.unregister_player(peer)
 				multiplayer.server_disconnected.emit()
 			else:
-				GameManager.unregister_player.rpc(1)
+				GameManager.unregister_player(1)
 		else:
 			GameManager.unregister_player.rpc(multiplayer.get_unique_id())
-
 
 func refresh_lobby():
 	var players = GameManager.get_player_list()
 	players.sort()
 	$Players/List.clear()
-	$Players/List.add_item(GameManager.get_player_name() + " (You)")
+	#$Players/List.add_item(GameManager.get_player_name() + " (You)")
 	for p in players:
 		$Players/List.add_item(p)
 
@@ -126,4 +124,5 @@ func _on_game_error(errtxt):
 
 func _process(_delta: float) -> void:
 	if GameManager.server_started:
+		refresh_lobby()
 		$Players/Start.disabled = not multiplayer.is_server()

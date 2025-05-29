@@ -17,6 +17,7 @@ var speed:float
 
 var lantern_lit:bool = false
 var is_name_set:bool = false
+var can_move:bool = true
 
 var bob_time:float = 0.0
 var idle_bob_speed:float = 3
@@ -30,7 +31,7 @@ func _ready() -> void:
 	camera.current = get_node("Inputs/InputSynchronizer").is_multiplayer_authority()
 	sprite.hide()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	
+
 func _process(_delta: float) -> void:
 	#Set player nametag:
 	if not GameManager.get_player_list().is_empty() and not is_name_set:
@@ -77,6 +78,7 @@ func _physics_process(delta: float) -> void:
 			#Escape Menu:
 			if Input.is_action_just_released("menu"):
 				UI.visible = !UI.visible
+				can_move = !can_move
 				toggle_mouse()
 				
 		if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
@@ -85,14 +87,15 @@ func _physics_process(delta: float) -> void:
 		else:
 			# The client simply updates the position to the last known one.
 			position = synced_position
-			
-		#handle sprint / player speed
-		speed = (14 if Input.is_action_pressed("sprint") and is_on_floor() else 7)
-
-		#handle movement
-		velocity = inputs.motion * speed
 		
-		move_and_slide()
+		if can_move:
+			#handle sprint / player speed
+			speed = (14 if Input.is_action_pressed("sprint") and is_on_floor() else 7)
+		
+			#handle movement
+			velocity = inputs.motion * speed
+		
+			move_and_slide()
 
 func toggle_mouse():
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -101,7 +104,7 @@ func toggle_mouse():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func camera_bob(delta:float):
-	if velocity.length() > 0:
+	if can_move and velocity.length() > 0:
 		bob_time += delta * (22 if Input.is_action_pressed("sprint") else 12)
 		camera.position.y = sin(bob_time) * (0.08 if Input.is_action_pressed("sprint") else 0.06)
 		hands.offset.y = -sin(bob_time) * (8 if Input.is_action_pressed("sprint") else 6)
