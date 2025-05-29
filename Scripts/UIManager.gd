@@ -8,8 +8,10 @@ func _ready() -> void:
 	environement.environment.ambient_light_color = Color(brightness.value, brightness.value, brightness.value)
 
 func _on_exit_pressed() -> void:
-	GameManager.unregister_player(multiplayer.get_unique_id())
-	GameManager.end_game()
+	if multiplayer.get_unique_id() == 1:
+		GameManager.unregister_player(1)
+	else:
+		GameManager.unregister_player.rpc(multiplayer.get_unique_id())
 	
 func _on_back_pressed() -> void:
 	$".".hide()

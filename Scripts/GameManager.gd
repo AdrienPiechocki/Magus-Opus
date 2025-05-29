@@ -1,52 +1,83 @@
 extends Node
 
-const NORAY_ADDRESS = "tomfol.io"
-const DEFAULT_PORT = 8890
+const NORAY_ADDRESS:String = "tomfol.io"
+const DEFAULT_PORT:int = 8890
 
 # Max number of players.
-const MAX_PLAYERS = 4
+const MAX_PLAYERS:int = 4
 
-var peer = ENetMultiplayerPeer.new()
+var peer:ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 
-var is_host = false
-var external_oid = ""
+var is_host:bool = false
+var external_oid:String = ""
 @export var server_started:bool = false
 @export var in_game:bool = false
+var was_in_game:bool = false
 
 # Name for my player.
-var player_name = "Player"
+var player_name:String = "Player"
 
 # Names for remote players in id:name format.
-@export var players = {}
+@export var players:Dictionary = {}
 
-var graphics_settings = {}
+@export var players_ready:Array = []
+
+var graphics_settings:Dictionary = {}
 
 # Signals to let lobby GUI know what's going on.
-#signal player_list_changed()
 signal connection_failed()
 signal connection_succeeded()
 signal game_ended()
 signal game_error(what)
 
-# Callback from SceneTree.
+func _ready():
+	load_config()
+	
+	Noray.on_connect_to_host.connect(_connected_ok_noray)
+	Noray.on_connect_nat.connect(handle_nat_connection)
+	Noray.on_connect_relay.connect(handle_relay_connection)
+	
+	Noray.connect_to_host(NORAY_ADDRESS, DEFAULT_PORT)
+	
+	multiplayer.peer_connected.connect(_player_connected)
+	multiplayer.connected_to_server.connect(_connected_ok_local)
+	multiplayer.connection_failed.connect(_connected_fail)
+	multiplayer.server_disconnected.connect(_server_disconnected)
+
+func _process(_delta: float) -> void:
+	if get_player_list().size() > MAX_PLAYERS:
+		if players.keys()[-1] == multiplayer.get_unique_id():
+			unregister_player.rpc(multiplayer.get_unique_id())
+			game_error.emit("Server full")
+			end_game() 
+			
+	if not players.keys().is_empty():
+		server_started = true
+	else:
+		server_started = false
+
+
 func _player_connected(_id):
-	# Registration of a client beings here, tell the connected player that we are here.
 	register_player.rpc(player_name)
 	
-# Callback from SceneTree.
 func _player_disconnected(id):
-	if has_node("/root/World"): # Game is in progress.
-		if multiplayer.is_server():
-			game_error.emit("Player " + players[id] + " disconnected")
-			end_game()
-	#else: # Game is not in progress.
-		## Unregister this player.
-		#unregister_player(id)
+	if was_in_game: # Game is in progress.
+		game_error.emit("Player " + players[id] + " disconnected")
+		remove_player(id)
+		multiplayer.disconnect_peer(id)
+	else:
+		remove_player(id)
+		multiplayer.disconnect_peer(id)
 
+@rpc("any_peer","call_local")
+func remove_player(id):
+	was_in_game = false
+	players.erase(id)
+	for player in get_tree().get_nodes_in_group("Player"):
+		if int(player.name) == id:
+			player.queue_free()
 
-# Callback from SceneTree, only for clients (not server).
 func _connected_ok_local():
-	# We just connected to a server
 	connection_succeeded.emit()
 
 func _connected_ok_noray():
@@ -54,47 +85,33 @@ func _connected_ok_noray():
 	await Noray.on_pid
 	await Noray.register_remote()
 
-# Callback from SceneTree, only for clients (not server).
 func _server_disconnected():
-	#game_error.emit("Server disconnected")
+	if not multiplayer.get_peers().is_empty():
+		game_error.emit("Server disconnected")
 	peer.close()
 	end_game()
-	#if server_started:
-		#unregister_player(1)
 
-# Callback from SceneTree, only for clients (not server).
 func _connected_fail():
 	connection_failed.emit()
 
-
-# Lobby management functions.
 @rpc("any_peer")
 func register_player(new_player_name):
 	var id = (1 if multiplayer.get_remote_sender_id() == 0 else multiplayer.get_remote_sender_id())
 	players[id] = new_player_name
 	print("Player ", new_player_name, " connected with ID ", id)
-	#player_list_changed.emit()
 	
 @rpc("any_peer")
 func unregister_player(id):
-	players.erase(id)
 	if id == 1:
 		is_host = false
 		_server_disconnected()
 	else:
-		multiplayer.disconnect_peer(id)
-	#player_list_changed.emit()
+		if GameManager.in_game:
+			was_in_game = true
+		_player_disconnected(id)
 
-
-@rpc("call_local")
-func load_world():
-	# Change scene.
-	var world = load("res://Scenes/World.tscn").instantiate()
-	get_tree().get_root().add_child(world)
-	get_tree().get_root().get_node("Lobby").hide()
 
 func host_game_local(new_player_name):
-	#TODO : if server already created -> return error
 	player_name = new_player_name
 	var err = peer.create_server(DEFAULT_PORT, MAX_PLAYERS)
 	if err != OK:
@@ -129,8 +146,17 @@ func get_player_list():
 func get_player_name():
 	return player_name
 
+
+@rpc("call_local")
+func load_world():
+	# Change scene.
+	var world = load("res://Scenes/World.tscn").instantiate()
+	get_tree().get_root().add_child(world)
+	get_tree().get_root().get_node("Lobby").hide()
+
 func begin_game():
 	assert(multiplayer.is_server())
+	toggle_game(true)
 	load_world.rpc()
 	
 	var world = get_tree().get_root().get_node("World")
@@ -145,10 +171,11 @@ func begin_game():
 		var player = player_scene.instantiate()
 		player.synced_position = spawn_pos
 		player.name = str(p_id)
-		world.get_node("Players").add_child(player)
+		world.get_node("Players").add_child(player, true)
 		print("spawned player with id: ", player.name)
-	toggle_game(true)
+	
 
+@rpc("any_peer")
 func end_game():
 	toggle_game(false)
 	if has_node("/root/World"): # Game is in progress.
@@ -160,21 +187,8 @@ func end_game():
 
 func toggle_game(toggle:bool):
 	in_game = toggle
-
-func _ready():
-	load_config()
 	
-	Noray.on_connect_to_host.connect(_connected_ok_noray)
-	Noray.on_connect_nat.connect(handle_nat_connection)
-	Noray.on_connect_relay.connect(handle_relay_connection)
-	
-	Noray.connect_to_host(NORAY_ADDRESS, DEFAULT_PORT)
-	
-	multiplayer.peer_connected.connect(_player_connected)
-	multiplayer.peer_disconnected.connect(_player_disconnected)
-	multiplayer.connected_to_server.connect(_connected_ok_local)
-	multiplayer.connection_failed.connect(_connected_fail)
-	multiplayer.server_disconnected.connect(_server_disconnected)
+### NORAY CONNEXION MANAGMENT :
 
 func handle_nat_connection(address, port):
 	var err = await connect_to_server(address, port)
@@ -223,17 +237,6 @@ func connect_to_server(address, port):
 	
 	return err
 
-func _process(_delta: float) -> void:
-	if get_player_list().size() > MAX_PLAYERS:
-		if players.keys()[-1] == multiplayer.get_unique_id():
-			unregister_player.rpc(multiplayer.get_unique_id())
-			game_error.emit("Server full")
-			end_game() 
-			
-	if not players.keys().is_empty():
-		server_started = true
-	else:
-		server_started = false
 
 
 ### CONFIG MANAGMENT :

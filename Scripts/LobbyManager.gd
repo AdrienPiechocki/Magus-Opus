@@ -6,7 +6,6 @@ func _ready():
 	# Called every time the node is added to the scene.
 	GameManager.connection_failed.connect(_on_connection_failed)
 	GameManager.connection_succeeded.connect(_on_connection_success)
-	#GameManager.player_list_changed.connect(refresh_lobby)
 	GameManager.game_ended.connect(_on_game_ended)
 	GameManager.game_error.connect(_on_game_error)
 	
@@ -68,9 +67,6 @@ func _on_join_pressed():
 		GameManager.join_game_local(ip, player_name)
 		$Players/CopyOID.disabled = true
 	
-func _on_start_pressed():
-	GameManager.begin_game()
-
 func _on_copy_oid_pressed() -> void:
 	DisplayServer.clipboard_set(Noray.oid)
 
@@ -125,8 +121,28 @@ func _on_game_error(errtxt):
 func _process(_delta: float) -> void:
 	if GameManager.server_started:
 		refresh_lobby()
-		$Players/Start.disabled = not multiplayer.is_server()
-
+		$Players/Start.disabled = (not multiplayer.is_server() if multiplayer.get_peers().is_empty() else !verify_ready())
+		$Players/Ready.disabled = (multiplayer.is_server() if multiplayer.get_peers().is_empty() else false)
+func verify_ready() -> bool:
+	for player in GameManager.players.keys():
+		if player not in GameManager.players_ready:
+			return false
+	return true
 
 func _on_exit_pressed() -> void:
 	get_tree().quit()
+
+func _on_ready_toggled(toggled_on: bool) -> void:
+	toggle_ready.rpc(toggled_on)
+		
+@rpc("any_peer", "call_local")
+func toggle_ready(toggle:bool):
+	if toggle:
+		print(multiplayer.get_remote_sender_id(), " is ready !")
+		GameManager.players_ready.append(multiplayer.get_remote_sender_id())
+	else:
+		print(multiplayer.get_remote_sender_id(), " isn't ready...")
+		GameManager.players_ready.erase(multiplayer.get_remote_sender_id())
+
+func _on_start_pressed() -> void:
+	GameManager.begin_game()

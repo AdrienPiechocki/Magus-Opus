@@ -159,7 +159,7 @@ anchor_bottom = 0.5
 offset_left = -109.0
 offset_top = -182.0
 offset_right = 110.0
-offset_bottom = 169.0
+offset_bottom = 213.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -185,11 +185,21 @@ text = "Copy OID"
 
 [node name="Start" type="Button" parent="Players"]
 layout_mode = 0
+offset_left = 69.0
+offset_top = 353.0
+offset_right = 148.0
+offset_bottom = 384.0
+toggle_mode = true
+text = "Start"
+
+[node name="Ready" type="Button" parent="Players"]
+layout_mode = 0
 offset_left = 118.5
 offset_top = 305.5
 offset_right = 197.5
 offset_bottom = 336.5
-text = "Start"
+toggle_mode = true
+text = "Ready"
 
 [node name="Back" type="Button" parent="Players"]
 layout_mode = 0
@@ -210,4 +220,5 @@ text = " Back "
 [connection signal="pressed" from="Connect/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="Players/CopyOID" to="." method="_on_copy_oid_pressed"]
 [connection signal="pressed" from="Players/Start" to="." method="_on_start_pressed"]
+[connection signal="toggled" from="Players/Ready" to="." method="_on_ready_toggled"]
 [connection signal="pressed" from="Players/Back" to="." method="_on_back_pressed"]

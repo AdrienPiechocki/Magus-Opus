@@ -9,6 +9,8 @@ var cooldown:float = 0.5
 var mouse_sensivity:float = 0.02
 var movement_dir:Vector3
 
+var rotating_head:bool = false
+
 func update(delta: float):
 	
 	#handle horizontal movement
@@ -37,10 +39,13 @@ func update(delta: float):
 	
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and camera.current and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		rotating_head = true
 		rotate_head.rpc(event)
 		camera.rotate_x(-event.relative.y * mouse_sensivity)
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-80), deg_to_rad(80))
-
+	else:
+		rotating_head = false
+		
 @rpc("any_peer", "call_local")
 func rotate_head(event:InputEvent):
 	head.rotate_y(-event.relative.x * mouse_sensivity)
