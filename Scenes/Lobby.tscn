@@ -21,7 +21,7 @@ anchor_bottom = 0.5
 offset_left = -125.0
 offset_top = -131.0
 offset_right = 125.0
-offset_bottom = 75.0
+offset_bottom = 109.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -63,6 +63,14 @@ offset_left = 38.0
 offset_top = 29.0
 offset_right = 203.0
 offset_bottom = 60.0
+
+[node name="Exit" type="Button" parent="Choice"]
+layout_mode = 0
+offset_left = 104.0
+offset_top = 193.0
+offset_right = 141.0
+offset_bottom = 224.0
+text = "Exit"
 
 [node name="Connect" type="Panel" parent="."]
 visible = false
@@ -196,6 +204,7 @@ text = " Back "
 [connection signal="pressed" from="Choice/Solo" to="." method="_on_solo_pressed"]
 [connection signal="pressed" from="Choice/LAN" to="." method="_on_lan_pressed"]
 [connection signal="pressed" from="Choice/Online" to="." method="_on_online_pressed"]
+[connection signal="pressed" from="Choice/Exit" to="." method="_on_exit_pressed"]
 [connection signal="pressed" from="Connect/Host" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="Connect/Join" to="." method="_on_join_pressed"]
 [connection signal="pressed" from="Connect/Back" to="." method="_on_back_pressed"]

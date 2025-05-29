@@ -14,6 +14,7 @@ func _on_exit_pressed() -> void:
 func _on_back_pressed() -> void:
 	$".".hide()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	get_parent().can_move = true
 
 func _on_brightness_slider_drag_ended(value_changed: bool) -> void:
 	if value_changed:

@@ -154,7 +154,7 @@ func end_game():
 	if has_node("/root/World"): # Game is in progress.
 		# End it
 		get_node("/root/World").queue_free()
-
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	game_ended.emit()
 	players.clear()
 

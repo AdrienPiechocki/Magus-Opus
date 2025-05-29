@@ -126,3 +126,7 @@ func _process(_delta: float) -> void:
 	if GameManager.server_started:
 		refresh_lobby()
 		$Players/Start.disabled = not multiplayer.is_server()
+
+
+func _on_exit_pressed() -> void:
+	get_tree().quit()

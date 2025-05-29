@@ -94,7 +94,7 @@ func _physics_process(delta: float) -> void:
 		
 			#handle movement
 			velocity = inputs.motion * speed
-		
+			
 			move_and_slide()
 
 func toggle_mouse():
@@ -104,7 +104,7 @@ func toggle_mouse():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func camera_bob(delta:float):
-	if can_move and velocity.length() > 0:
+	if can_move and velocity.length() > 0 and is_on_floor():
 		bob_time += delta * (22 if Input.is_action_pressed("sprint") else 12)
 		camera.position.y = sin(bob_time) * (0.08 if Input.is_action_pressed("sprint") else 0.06)
 		hands.offset.y = -sin(bob_time) * (8 if Input.is_action_pressed("sprint") else 6)

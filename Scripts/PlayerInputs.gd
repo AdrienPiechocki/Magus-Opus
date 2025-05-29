@@ -21,9 +21,10 @@ func update(delta: float):
 		movement_dir.y -= 10 * delta
 	
 	#handle jump
-	if Input.is_action_pressed("jump") and get_parent().is_on_floor() and cooldown <= 0:
+	elif Input.is_action_pressed("jump") and cooldown <= 0:
 		cooldown = 0.5
-		movement_dir.y = (1.8 if Input.is_action_pressed("sprint") else 2.0)
+		movement_dir.y = 2
+		
 		
 	#jump cooldown
 	if cooldown > 0:
