@@ -1,6 +1,8 @@
 extends Control
 
 var is_online:bool = false
+var ready_style:StyleBoxFlat = StyleBoxFlat.new()
+@onready var default_color:Color = $Choice.get_theme_stylebox("panel").bg_color
 
 func _ready():
 	# Called every time the node is added to the scene.
@@ -86,7 +88,8 @@ func _on_back_pressed() -> void:
 				GameManager.unregister_player(1)
 		else:
 			GameManager.unregister_player.rpc(multiplayer.get_unique_id())
-
+		
+		
 func refresh_lobby():
 	var players = GameManager.get_player_list()
 	players.sort()
@@ -121,8 +124,12 @@ func _on_game_error(errtxt):
 func _process(_delta: float) -> void:
 	if GameManager.server_started:
 		refresh_lobby()
-		$Players/Start.disabled = (not multiplayer.is_server() if multiplayer.get_peers().is_empty() else !verify_ready())
+		$Players/Start.disabled = (not multiplayer.is_server() if multiplayer.get_peers().is_empty() else not (verify_ready() and multiplayer.is_server()))
 		$Players/Ready.disabled = (multiplayer.is_server() if multiplayer.get_peers().is_empty() else false)
+	else:
+		GameManager.players_ready = []
+		$Players/Ready.button_pressed = false
+				
 func verify_ready() -> bool:
 	for player in GameManager.players.keys():
 		if player not in GameManager.players_ready:
@@ -134,7 +141,9 @@ func _on_exit_pressed() -> void:
 
 func _on_ready_toggled(toggled_on: bool) -> void:
 	toggle_ready.rpc(toggled_on)
-		
+	ready_style.bg_color = (Color.LIME_GREEN if toggled_on else default_color)
+	$Players/Ready.add_theme_stylebox_override("pressed", ready_style)
+	
 @rpc("any_peer", "call_local")
 func toggle_ready(toggle:bool):
 	if toggle:
