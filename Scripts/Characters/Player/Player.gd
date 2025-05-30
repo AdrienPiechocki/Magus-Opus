@@ -30,6 +30,7 @@ func _ready() -> void:
 		get_node("Inputs/InputSynchronizer").set_multiplayer_authority(str(name).to_int())
 	camera.current = get_node("Inputs/InputSynchronizer").is_multiplayer_authority()
 	sprite.hide()
+	hands.show()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _process(_delta: float) -> void:
@@ -63,6 +64,7 @@ func set_player_name():
 @rpc("any_peer", "call_local")
 func set_visibility():
 	sprite.show()
+	hands.hide()
 
 func _physics_process(delta: float) -> void:	
 	if everyone_in_game():

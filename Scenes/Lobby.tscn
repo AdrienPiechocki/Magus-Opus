@@ -135,10 +135,10 @@ text = "Join"
 
 [node name="ErrorLabel" type="Label" parent="Connect"]
 layout_mode = 0
-offset_left = -51.0
-offset_top = 153.0
-offset_right = 298.0
-offset_bottom = 209.0
+offset_left = 76.0
+offset_top = 140.0
+offset_right = 425.0
+offset_bottom = 196.0
 
 [node name="Back" type="Button" parent="Connect"]
 layout_mode = 0
