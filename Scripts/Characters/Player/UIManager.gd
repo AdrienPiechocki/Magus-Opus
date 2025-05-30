@@ -22,4 +22,4 @@ func _on_brightness_slider_drag_ended(value_changed: bool) -> void:
 	if value_changed:
 		environement.environment.ambient_light_color = Color(brightness.value, brightness.value, brightness.value)
 		GameManager.graphics_settings["brightness"] = brightness.value
-		GameManager.save_config()
+		GameManager.get_node("ConfigManager").save_config()

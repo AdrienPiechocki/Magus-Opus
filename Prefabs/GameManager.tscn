@@ -1,23 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://b4aronf3viax3"]
+[gd_scene load_steps=4 format=3 uid="uid://b4aronf3viax3"]
 
-[ext_resource type="Script" uid="uid://5ka6vhemksjo" path="res://Scripts/GameManager.gd" id="1_4v1xe"]
+[ext_resource type="Script" uid="uid://5ka6vhemksjo" path="res://Scripts/System/GameManager.gd" id="1_4v1xe"]
+[ext_resource type="Script" uid="uid://cudn1jdfas54a" path="res://Scripts/System/ConfigManager.gd" id="2_uc36f"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_4v1xe"]
-properties/0/path = NodePath(".:in_game")
+properties/0/path = NodePath(".:server_started")
 properties/0/spawn = true
 properties/0/replication_mode = 1
-properties/1/path = NodePath(".:server_started")
+properties/1/path = NodePath(".:players")
 properties/1/spawn = true
 properties/1/replication_mode = 1
-properties/2/path = NodePath(".:players")
-properties/2/spawn = true
-properties/2/replication_mode = 1
-properties/3/path = NodePath(".:players_ready")
-properties/3/spawn = true
-properties/3/replication_mode = 1
 
 [node name="GameManager" type="Node"]
 script = ExtResource("1_4v1xe")
+
+[node name="ConfigManager" type="Node" parent="."]
+script = ExtResource("2_uc36f")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_4v1xe")

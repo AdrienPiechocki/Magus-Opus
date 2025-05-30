@@ -58,14 +58,14 @@ func set_lantern(delta:float):
 
 @rpc("any_peer", "call_local")
 func set_player_name():
-	label.text = str(GameManager.players[int(name)])
+	label.text = str(GameManager.players[int(name)]["name"])
 
 @rpc("any_peer", "call_local")
 func set_visibility():
 	sprite.show()
 
 func _physics_process(delta: float) -> void:	
-	if GameManager.in_game:
+	if everyone_in_game():
 		if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
 			# The client which this player represent will update the controls state, and notify it to everyone.
 			inputs.update(delta)
@@ -112,3 +112,9 @@ func camera_bob(delta:float):
 		bob_time += delta * idle_bob_speed
 		camera.position.y = sin(bob_time) * idle_bob_amount
 		hands.offset.y = -sin(bob_time) * idle_bob_amount * 100
+
+func everyone_in_game() -> bool:
+	for player in GameManager.players.keys():
+		if !GameManager.players[player]["in_game"]:
+			return false
+	return true

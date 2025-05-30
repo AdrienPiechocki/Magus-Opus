@@ -33,7 +33,7 @@ func _ready() -> void:
 	mat = mesh.surface_get_material(0).duplicate()
 	
 func _process(_delta: float) -> void:
-	if GameManager.in_game:
+	if everyone_in_game():
 		update.rpc_id(int(get_parent().name))
 		for player in get_tree().get_nodes_in_group("Player"):
 			if player.name != get_parent().name:
@@ -57,6 +57,12 @@ func _process(_delta: float) -> void:
 						set_texture(player, [NorthWest, West, SouthWest, South, SouthEast, East, NorthEast, North])
 					elif pos.z < 0:
 						set_texture(player, [NorthEast, North, NorthWest, West, SouthWest, South, SouthEast, East])
+
+func everyone_in_game() -> bool:
+	for player in GameManager.players.keys():
+		if !GameManager.players[player]["in_game"]:
+			return false
+	return true
 
 func set_texture(player, order:Array):
 	if sideToMaterial[currentSide] == North:

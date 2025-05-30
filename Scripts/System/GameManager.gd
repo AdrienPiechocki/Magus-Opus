@@ -11,16 +11,14 @@ var peer:ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 var is_host:bool = false
 var external_oid:String = ""
 @export var server_started:bool = false
-@export var in_game:bool = false
 var was_in_game:bool = false
+var can_connect:bool = true
 
 # Name for my player.
 var player_name:String = "Player"
 
 # Names for remote players in id:name format.
 @export var players:Dictionary = {}
-
-@export var players_ready:Array = []
 
 var graphics_settings:Dictionary = {}
 
@@ -31,8 +29,6 @@ signal game_ended()
 signal game_error(what)
 
 func _ready():
-	load_config()
-	
 	Noray.on_connect_to_host.connect(_connected_ok_noray)
 	Noray.on_connect_nat.connect(handle_nat_connection)
 	Noray.on_connect_relay.connect(handle_relay_connection)
@@ -56,18 +52,22 @@ func _process(_delta: float) -> void:
 	else:
 		server_started = false
 
-
+@rpc("any_peer")
 func _player_connected(_id):
 	register_player.rpc(player_name)
-	
+	set_can_connect.rpc_id(1)
+	if !can_connect:
+		unregister_player.rpc(multiplayer.get_remote_sender_id())
+		
 func _player_disconnected(id):
-	if was_in_game: # Game is in progress.
-		game_error.emit("Player " + players[id] + " disconnected")
-		remove_player(id)
-		multiplayer.disconnect_peer(id)
-	else:
-		remove_player(id)
-		multiplayer.disconnect_peer(id)
+	if id == 0:
+		game_error.emit("Game already in progress")
+		end_game()
+		return
+	if was_in_game:
+		game_error.emit("Player " + players[id]["name"] + " disconnected")
+	remove_player(id)
+	multiplayer.disconnect_peer(id)
 
 @rpc("any_peer","call_local")
 func remove_player(id):
@@ -97,7 +97,7 @@ func _connected_fail():
 @rpc("any_peer")
 func register_player(new_player_name):
 	var id = (1 if multiplayer.get_remote_sender_id() == 0 else multiplayer.get_remote_sender_id())
-	players[id] = new_player_name
+	players[id] = {"name": new_player_name, "ready": false, "in_game": false}
 	print("Player ", new_player_name, " connected with ID ", id)
 	
 @rpc("any_peer")
@@ -106,7 +106,7 @@ func unregister_player(id):
 		is_host = false
 		_server_disconnected()
 	else:
-		if GameManager.in_game:
+		if players[multiplayer.get_remote_sender_id()]["in_game"]:
 			was_in_game = true
 		_player_disconnected(id)
 
@@ -133,16 +133,23 @@ func join_game_local(ip, new_player_name):
 	player_name = new_player_name
 	peer.create_client(ip, DEFAULT_PORT)
 	multiplayer.multiplayer_peer = peer
-	
+
 func join_game_noray(oid, new_player_name):
 	player_name = new_player_name
 	Noray.connect_nat(oid)
 	external_oid = oid
 
+@rpc("any_peer", "call_local")
+func set_can_connect():
+	can_connect = !players[multiplayer.get_remote_sender_id()]["in_game"]
+
+
 func get_player_list():
-	return players.values()
-
-
+	var names := []
+	for id in players.keys():
+		names.append(players[id]["name"])
+	return names
+	
 func get_player_name():
 	return player_name
 
@@ -156,7 +163,8 @@ func load_world():
 
 func begin_game():
 	assert(multiplayer.is_server())
-	toggle_game(true)
+	for player in players.keys():
+		players[player]["in_game"] = true
 	load_world.rpc()
 	
 	var world = get_tree().get_root().get_node("World")
@@ -177,7 +185,9 @@ func begin_game():
 
 @rpc("any_peer")
 func end_game():
-	toggle_game(false)
+	for player in players.keys():
+		if player == multiplayer.get_remote_sender_id():
+			players[player]["in_game"] = false
 	if has_node("/root/World"): # Game is in progress.
 		# End it
 		get_node("/root/World").queue_free()
@@ -185,9 +195,6 @@ func end_game():
 	game_ended.emit()
 	players.clear()
 
-func toggle_game(toggle:bool):
-	in_game = toggle
-	
 ### NORAY CONNEXION MANAGMENT :
 
 func handle_nat_connection(address, port):
@@ -236,32 +243,3 @@ func connect_to_server(address, port):
 		err = await PacketHandshake.over_enet(multiplayer.multiplayer_peer.host, address, port)
 	
 	return err
-
-
-
-### CONFIG MANAGMENT :
-
-func load_config():
-	var config = ConfigFile.new()
-	var err = config.load("user://settings.cfg")
-	#if config doesn't exist, create config
-	if err != OK:
-		create_config(config)
-
-	#load config values
-	graphics_settings["brightness"] = config.get_value("Graphics", "brightness")
-
-func create_config(config:ConfigFile):
-	#create default values
-	config.set_value("Graphics", "brightness", 0.0)
-	
-	#save config
-	config.save("user://settings.cfg")
-
-func save_config():
-	var config = ConfigFile.new()
-	for key in graphics_settings.keys():
-		config.set_value("Graphics", key, graphics_settings[key])
-	
-	#save config
-	config.save("user://settings.cfg")

@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://7f7l4p7vag76"]
 
 [ext_resource type="PackedScene" uid="uid://d4al8xfet7mon" path="res://Graphics/meshes/Adventurer.fbx" id="1_rkwvs"]
-[ext_resource type="Script" uid="uid://pbf7jhc78e5g" path="res://Scripts/SpriteGenerator.gd" id="1_w5xtm"]
+[ext_resource type="Script" uid="uid://pbf7jhc78e5g" path="res://Scripts/System/SpriteGenerator.gd" id="1_w5xtm"]
 
 [node name="SpriteGenerator" type="SubViewport"]
 transparent_bg = true

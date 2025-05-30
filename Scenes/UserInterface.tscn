@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://cdiokfvfbqsxh"]
 
-[ext_resource type="Script" uid="uid://bi2wha2ms4nmx" path="res://Scripts/UIManager.gd" id="1_ofew4"]
+[ext_resource type="Script" uid="uid://bi2wha2ms4nmx" path="res://Scripts/Characters/Player/UIManager.gd" id="1_ofew4"]
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_xc8ml"]
 color = Color(0.593134, 0.593134, 0.593134, 1)

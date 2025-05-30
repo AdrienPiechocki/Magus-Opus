@@ -127,12 +127,13 @@ func _process(_delta: float) -> void:
 		$Players/Start.disabled = (not multiplayer.is_server() if multiplayer.get_peers().is_empty() else not (verify_ready() and multiplayer.is_server()))
 		$Players/Ready.disabled = (multiplayer.is_server() if multiplayer.get_peers().is_empty() else false)
 	else:
-		GameManager.players_ready = []
+		for player in GameManager.players.keys():
+			GameManager.players[player]["ready"] = false
 		$Players/Ready.button_pressed = false
 				
 func verify_ready() -> bool:
 	for player in GameManager.players.keys():
-		if player not in GameManager.players_ready:
+		if not GameManager.players[player]["ready"]:
 			return false
 	return true
 
@@ -148,10 +149,10 @@ func _on_ready_toggled(toggled_on: bool) -> void:
 func toggle_ready(toggle:bool):
 	if toggle:
 		print(multiplayer.get_remote_sender_id(), " is ready !")
-		GameManager.players_ready.append(multiplayer.get_remote_sender_id())
+		GameManager.players[multiplayer.get_remote_sender_id()]["ready"] = true
 	else:
 		print(multiplayer.get_remote_sender_id(), " isn't ready...")
-		GameManager.players_ready.erase(multiplayer.get_remote_sender_id())
+		GameManager.players[multiplayer.get_remote_sender_id()]["ready"] = false
 
 func _on_start_pressed() -> void:
 	GameManager.begin_game()
