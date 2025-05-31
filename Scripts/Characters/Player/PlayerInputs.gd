@@ -1,14 +1,12 @@
 extends Node
 
 @export var motion:Vector3 = Vector3.ZERO
-var cooldown:float = 0.5
 
-@onready var camera = $"../Head/Camera3D"
+@onready var camera = $"../Camera3D"
 @onready var head = $"../Head"
 
 var mouse_sensivity:float = 0.02
 var movement_dir:Vector3
-
 var rotating_head:bool = false
 
 func update(delta: float):
@@ -21,31 +19,21 @@ func update(delta: float):
 	#handle gravity
 	if not get_parent().is_on_floor():
 		movement_dir.y -= 10 * delta
-	
 	#handle jump
-	elif Input.is_action_pressed("jump") and cooldown <= 0:
-		cooldown = 0.5
+	elif Input.is_action_pressed("jump"):
 		movement_dir.y = 2
-		
-		
-	#jump cooldown
-	if cooldown > 0:
-		cooldown -= delta
 	
-	#movment based on camera orientation
-	movement_dir = head.basis * movement_dir
+	#movment based on player orientation
+	movement_dir = get_parent().basis * movement_dir
 	
 	motion = movement_dir
 	
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and camera.current and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotating_head = true
-		rotate_head.rpc(event)
+		get_parent().rotate_y(-event.relative.x * mouse_sensivity)
+		head.rotate_y(-event.relative.x * mouse_sensivity)
 		camera.rotate_x(-event.relative.y * mouse_sensivity)
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-80), deg_to_rad(80))
 	else:
 		rotating_head = false
-		
-@rpc("any_peer", "call_local")
-func rotate_head(event:InputEvent):
-	head.rotate_y(-event.relative.x * mouse_sensivity)

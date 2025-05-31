@@ -211,6 +211,17 @@ text = " Back "
 
 [node name="ErrorDialog" type="AcceptDialog" parent="."]
 
+[node name="GameVersion" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -41.0
+offset_right = 238.0
+grow_vertical = 0
+text = "Version : ALPHA 0.1"
+horizontal_alignment = 1
+
 [connection signal="pressed" from="Choice/Solo" to="." method="_on_solo_pressed"]
 [connection signal="pressed" from="Choice/LAN" to="." method="_on_lan_pressed"]
 [connection signal="pressed" from="Choice/Online" to="." method="_on_online_pressed"]

@@ -13,6 +13,7 @@ config_version=5
 config/name="Magus Opus"
 run/main_scene="uid://crsckic2hwo3n"
 config/features=PackedStringArray("4.4", "Forward Plus")
+run/max_fps=60
 config/icon="res://Graphics/icon.svg"
 
 [autoload]
@@ -24,6 +25,7 @@ PacketHandshake="*res://addons/netfox.noray/packet-handshake.gd"
 [display]
 
 window/stretch/mode="canvas_items"
+window/vsync/vsync_mode=0
 
 [editor_plugins]
 
@@ -80,6 +82,17 @@ light={
 
 3d_physics/layer_1="Players"
 3d_physics/layer_2="NPCs"
+
+[network]
+
+limits/tcp/connect_timeout_seconds=5
+
+[physics]
+
+common/physics_ticks_per_second=30
+common/physics_jitter_fix=0.0
+3d/physics_engine="Jolt Physics"
+common/physics_interpolation=true
 
 [rendering]
 

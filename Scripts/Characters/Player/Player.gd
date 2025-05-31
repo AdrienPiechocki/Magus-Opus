@@ -6,7 +6,7 @@ var speed:float
 
 @onready var label = $NameTag
 @onready var inputs = $Inputs
-@onready var camera = $Head/Camera3D
+@onready var camera = $Camera3D
 @onready var head = $Head
 @onready var lantern = $Head/Lantern
 @onready var sprite = $Sprite
@@ -24,6 +24,8 @@ var idle_bob_speed:float = 3
 var idle_bob_amount:float = 0.02
 var flicker_amount:float = 0.2
 
+var last_known_pos:Array = []
+
 func _ready() -> void:
 	position = synced_position
 	if str(name).is_valid_int():
@@ -32,7 +34,8 @@ func _ready() -> void:
 	sprite.hide()
 	hands.show()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
+	last_known_pos.append(position)
+	
 func _process(_delta: float) -> void:
 	#Set player nametag:
 	if not GameManager.get_player_list().is_empty() and not is_name_set:
@@ -67,7 +70,7 @@ func set_visibility():
 	hands.hide()
 
 func _physics_process(delta: float) -> void:	
-	if everyone_in_game():
+	if everyone_in_game() and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
 		if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
 			# The client which this player represent will update the controls state, and notify it to everyone.
 			inputs.update(delta)
@@ -86,8 +89,11 @@ func _physics_process(delta: float) -> void:
 		if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
 			# The server updates the position that will be notified to the clients.
 			synced_position = position
-		else:
-			# The client simply updates the position to the last known one.
+			if last_known_pos[last_known_pos.size()-1] != position:
+				last_known_pos.append(position)
+				if last_known_pos.size() > 10:
+					last_known_pos.remove_at(0)
+		elif should_sync():
 			position = synced_position
 		
 		if can_move:
@@ -99,6 +105,12 @@ func _physics_process(delta: float) -> void:
 			
 			move_and_slide()
 
+func should_sync() -> bool:
+	for pos in last_known_pos:
+		if pos != position and synced_position != position:
+			return true
+	return false
+
 func toggle_mouse():
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -108,11 +120,11 @@ func toggle_mouse():
 func camera_bob(delta:float):
 	if can_move and velocity.length() > 0 and is_on_floor():
 		bob_time += delta * (22 if Input.is_action_pressed("sprint") else 12)
-		camera.position.y = sin(bob_time) * (0.08 if Input.is_action_pressed("sprint") else 0.06)
+		camera.position.y = 0.66 + sin(bob_time) * (0.08 if Input.is_action_pressed("sprint") else 0.06)
 		hands.offset.y = -sin(bob_time) * (8 if Input.is_action_pressed("sprint") else 6)
 	else:
 		bob_time += delta * idle_bob_speed
-		camera.position.y = sin(bob_time) * idle_bob_amount
+		camera.position.y = 0.66 + sin(bob_time) * idle_bob_amount
 		hands.offset.y = -sin(bob_time) * idle_bob_amount * 100
 
 func everyone_in_game() -> bool:

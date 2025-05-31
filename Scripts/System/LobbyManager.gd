@@ -141,9 +141,15 @@ func _on_exit_pressed() -> void:
 	get_tree().quit()
 
 func _on_ready_toggled(toggled_on: bool) -> void:
-	toggle_ready.rpc(toggled_on)
+	if multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+		toggle_ready.rpc(toggled_on)
 	ready_style.bg_color = (Color.LIME_GREEN if toggled_on else default_color)
 	$Players/Ready.add_theme_stylebox_override("pressed", ready_style)
+	
+	for player in GameManager.players.keys():
+		if GameManager.players[player]["in_game"]:
+			GameManager.join_game.rpc_id(1)
+			return
 	
 @rpc("any_peer", "call_local")
 func toggle_ready(toggle:bool):

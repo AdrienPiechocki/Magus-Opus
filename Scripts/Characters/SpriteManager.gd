@@ -32,8 +32,8 @@ func _ready() -> void:
 	multiplayer.allow_object_decoding = true
 	mat = mesh.surface_get_material(0).duplicate()
 	
-func _process(_delta: float) -> void:
-	if everyone_in_game():
+func _physics_process(_delta: float) -> void:
+	if everyone_in_game() and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
 		update.rpc_id(int(get_parent().name))
 		for player in get_tree().get_nodes_in_group("Player"):
 			if player.name != get_parent().name:
@@ -84,7 +84,7 @@ func set_texture(player, order:Array):
 
 @rpc("any_peer", "call_local")
 func update():
-	angle = round_to_dec(head.rotation_degrees.y, 1)
+	angle = round_to_dec(get_parent().rotation_degrees.y, 1)
 	set_orientation.rpc(angle)
 	
 func round_to_dec(num, digit):

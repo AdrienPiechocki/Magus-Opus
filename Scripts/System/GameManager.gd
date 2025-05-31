@@ -22,6 +22,9 @@ var player_name:String = "Player"
 
 var graphics_settings:Dictionary = {}
 
+var world:PackedScene = preload("res://Scenes/World.tscn")
+var player_scene:PackedScene = preload("res://Prefabs/Players/player.tscn")
+
 # Signals to let lobby GUI know what's going on.
 signal connection_failed()
 signal connection_succeeded()
@@ -55,15 +58,8 @@ func _process(_delta: float) -> void:
 @rpc("any_peer")
 func _player_connected(_id):
 	register_player.rpc(player_name)
-	set_can_connect.rpc_id(1)
-	if !can_connect:
-		unregister_player.rpc(multiplayer.get_remote_sender_id())
-		
+
 func _player_disconnected(id):
-	if id == 0:
-		game_error.emit("Game already in progress")
-		end_game()
-		return
 	if was_in_game:
 		game_error.emit("Player " + players[id]["name"] + " disconnected")
 	remove_player(id)
@@ -99,6 +95,7 @@ func register_player(new_player_name):
 	var id = (1 if multiplayer.get_remote_sender_id() == 0 else multiplayer.get_remote_sender_id())
 	players[id] = {"name": new_player_name, "ready": false, "in_game": false}
 	print("Player ", new_player_name, " connected with ID ", id)
+	
 	
 @rpc("any_peer")
 func unregister_player(id):
@@ -139,11 +136,6 @@ func join_game_noray(oid, new_player_name):
 	Noray.connect_nat(oid)
 	external_oid = oid
 
-@rpc("any_peer", "call_local")
-func set_can_connect():
-	can_connect = !players[multiplayer.get_remote_sender_id()]["in_game"]
-
-
 func get_player_list():
 	var names := []
 	for id in players.keys():
@@ -157,8 +149,7 @@ func get_player_name():
 @rpc("call_local")
 func load_world():
 	# Change scene.
-	var world = load("res://Scenes/World.tscn").instantiate()
-	get_tree().get_root().add_child(world)
+	get_tree().get_root().add_child(world.instantiate())
 	get_tree().get_root().get_node("Lobby").hide()
 
 func begin_game():
@@ -167,21 +158,31 @@ func begin_game():
 		players[player]["in_game"] = true
 	load_world.rpc()
 	
-	var world = get_tree().get_root().get_node("World")
-	var player_scene = load("res://Prefabs/Players/player.tscn")
+	var _world = get_tree().get_root().get_node("World")
 	
 	var spawns:Array = []
 	for p: int in players.keys():
 		spawns.append(p)
 	
 	for p_id: int in spawns:
-		var spawn_pos: Vector3 = world.get_node("Spawn").position
+		var spawn_pos: Vector3 = _world.get_node("Spawn").position
 		var player = player_scene.instantiate()
 		player.synced_position = spawn_pos
 		player.name = str(p_id)
-		world.get_node("Players").add_child(player, true)
+		_world.get_node("Players").add_child(player, true)
 		print("spawned player with id: ", player.name)
-	
+
+@rpc("any_peer", "call_local")
+func join_game():
+	players[multiplayer.get_remote_sender_id()]["in_game"] = true
+	load_world.rpc()
+	var _world = get_tree().get_root().get_node("World")
+	var spawn_pos: Vector3 = _world.get_node("Spawn").position
+	var player = player_scene.instantiate()
+	player.synced_position = spawn_pos
+	player.name = str(multiplayer.get_remote_sender_id())
+	_world.get_node("Players").add_child(player)
+	print("spawned player with id: ", player.name)
 
 @rpc("any_peer")
 func end_game():
