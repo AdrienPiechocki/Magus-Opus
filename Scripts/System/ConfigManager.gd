@@ -1,5 +1,7 @@
 extends Node
 
+var settings:Dictionary = {}
+
 func _ready() -> void:
 	load_config()
 
@@ -11,7 +13,9 @@ func load_config():
 		create_config(config)
 
 	#load config values
-	GameManager.graphics_settings["brightness"] = config.get_value("Graphics", "brightness")
+	settings["Graphics"] = {
+		"brightness": config.get_value("Graphics", "brightness"),
+		}
 
 func create_config(config:ConfigFile):
 	#create default values
@@ -22,8 +26,9 @@ func create_config(config:ConfigFile):
 
 func save_config():
 	var config = ConfigFile.new()
-	for key in GameManager.graphics_settings.keys():
-		config.set_value("Graphics", key, GameManager.graphics_settings[key])
+	for category in settings.keys():
+		for key in settings[category]:
+			config.set_value(category, key, settings[category][key])
 	
 	#save config
 	config.save("user://settings.cfg")

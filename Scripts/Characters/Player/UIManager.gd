@@ -2,9 +2,10 @@ extends Node
 
 @onready var environement:WorldEnvironment = $"/root/World/WorldEnvironment"
 @onready var brightness = $Menu/Settings/BrightnessSlider
+@onready var config_manager = GameManager.get_node("ConfigManager")
 
 func _ready() -> void:
-	brightness.value = GameManager.graphics_settings["brightness"]
+	brightness.value = config_manager.settings["Graphics"]["brightness"]
 	environement.environment.ambient_light_color = Color(brightness.value, brightness.value, brightness.value)
 
 func _on_exit_pressed() -> void:
@@ -21,5 +22,5 @@ func _on_back_pressed() -> void:
 func _on_brightness_slider_drag_ended(value_changed: bool) -> void:
 	if value_changed:
 		environement.environment.ambient_light_color = Color(brightness.value, brightness.value, brightness.value)
-		GameManager.graphics_settings["brightness"] = brightness.value
-		GameManager.get_node("ConfigManager").save_config()
+		config_manager.settings["Graphics"]["brightness"] = brightness.value
+		config_manager.save_config()

@@ -20,8 +20,6 @@ var player_name:String = "Player"
 # Names for remote players in id:name format.
 @export var players:Dictionary = {}
 
-var graphics_settings:Dictionary = {}
-
 var world:PackedScene = preload("res://Scenes/World.tscn")
 var player_scene:PackedScene = preload("res://Prefabs/Players/player.tscn")
 
