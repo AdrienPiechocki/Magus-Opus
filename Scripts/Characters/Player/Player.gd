@@ -2,22 +2,22 @@ extends CharacterBody3D
 
 var speed:float
 
-@export var synced_position := Vector3()
+@export var synced_position:Vector3
+var lantern_lit:bool
+var in_menu:bool
 
-@onready var label = $NameTag
-@onready var inputs = $Inputs
-@onready var camera = $Camera3D
-@onready var head = $Head
-@onready var lantern = $Head/Lantern
-@onready var sprite = $Sprite
-@onready var hands = $Hands
-@onready var left_hand = $Hands/LeftHand
-@onready var right_hand = $Hands/RightHand
-@onready var UI = $UserInterface
+@onready var label:Label3D = $NameTag
+@onready var inputs:Node = $Inputs
+@onready var camera:Camera3D = $Camera3D
+@onready var head:Node3D = $Head
+@onready var lantern:OmniLight3D = $Head/Lantern
+@onready var sprite:MeshInstance3D = $Sprite
+@onready var hands:CanvasLayer = $Hands
+@onready var left_hand:TextureRect = $Hands/LeftHand
+@onready var right_hand:TextureRect = $Hands/RightHand
+@onready var UI:Control = $UserInterface
 
-var lantern_lit:bool = false
-var is_name_set:bool = false
-var can_move:bool = true
+var is_name_set:bool
 
 var bob_time:float = 0.0
 var idle_bob_speed:float = 3
@@ -25,6 +25,8 @@ var idle_bob_amount:float = 0.02
 var flicker_amount:float = 0.2
 
 var last_known_pos:Array = []
+
+var data:Dictionary = {}
 
 func _ready() -> void:
 	position = synced_position
@@ -35,6 +37,10 @@ func _ready() -> void:
 	hands.show()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	last_known_pos.append(position)
+	for player in GameManager.players.keys():
+		if GameManager.players[player] == GameManager.players[multiplayer.get_unique_id()]:
+			for _data in GameManager.players[player]["data"]:
+				set(str(_data), GameManager.players[player]["data"][_data])
 	
 func _process(_delta: float) -> void:
 	#Set player nametag:
@@ -81,11 +87,21 @@ func _physics_process(delta: float) -> void:
 			set_lantern.rpc(delta)
 			
 			#Escape Menu:
-			if Input.is_action_just_released("menu"):
-				UI.visible = !UI.visible
-				can_move = !can_move
-				toggle_mouse()
+			UI.visible = in_menu
+			toggle_mouse()
+			if Input.is_action_just_pressed("menu"):
+				in_menu = !in_menu
 				
+		if should_sync():
+			data = {"synced_position": position, 
+					"rotation": rotation, 
+					"lantern_lit": lantern_lit,
+					"in_menu": in_menu
+					}
+			for player in GameManager.players.keys():
+				if GameManager.players[player] == GameManager.players[multiplayer.get_unique_id()]:
+					GameManager.players[player]["data"] = data
+					
 		if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
 			# The server updates the position that will be notified to the clients.
 			synced_position = position
@@ -93,10 +109,11 @@ func _physics_process(delta: float) -> void:
 				last_known_pos.append(position)
 				if last_known_pos.size() > 10:
 					last_known_pos.remove_at(0)
+						
 		elif should_sync():
 			position = synced_position
 		
-		if can_move:
+		if !in_menu:
 			#handle sprint / player speed
 			speed = (14 if Input.is_action_pressed("sprint") and is_on_floor() else 7)
 		
@@ -109,16 +126,18 @@ func should_sync() -> bool:
 	for pos in last_known_pos:
 		if pos != position and synced_position != position:
 			return true
+	if Input.is_action_just_pressed("menu") or Input.is_action_just_pressed("light"):
+		return true
 	return false
 
 func toggle_mouse():
-	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	if in_menu:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	else:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func camera_bob(delta:float):
-	if can_move and velocity.length() > 0 and is_on_floor():
+	if !in_menu and velocity.length() > 0 and is_on_floor():
 		bob_time += delta * (22 if Input.is_action_pressed("sprint") else 12)
 		camera.position.y = 0.66 + sin(bob_time) * (0.08 if Input.is_action_pressed("sprint") else 0.06)
 		hands.offset.y = -sin(bob_time) * (8 if Input.is_action_pressed("sprint") else 6)
@@ -129,6 +148,6 @@ func camera_bob(delta:float):
 
 func everyone_in_game() -> bool:
 	for player in GameManager.players.keys():
-		if !GameManager.players[player]["in_game"]:
+		if not GameManager.players[player]["in_game"]:
 			return false
 	return true

@@ -10,15 +10,15 @@ func _ready():
 	GameManager.connection_succeeded.connect(_on_connection_success)
 	GameManager.game_ended.connect(_on_game_ended)
 	GameManager.game_error.connect(_on_game_error)
-	
+	GameManager.players_list_changed.connect(refresh_lobby)
 	# Set the player name according to the system username
 	if OS.has_environment("USERNAME"):
 		$Choice/Name.text = OS.get_environment("USERNAME")
 
 func _on_solo_pressed() -> void:
-	var player_name = $Connect/Name.text 
+	var player_name = $Choice/Name.text 
 	GameManager.host_game_local(player_name)
-	GameManager.begin_game()
+	GameManager.load_world()
 
 func _on_lan_pressed() -> void:
 	$Choice.hide()
@@ -68,26 +68,21 @@ func _on_join_pressed():
 	else:
 		GameManager.join_game_local(ip, player_name)
 		$Players/CopyOID.disabled = true
-	
+
 func _on_copy_oid_pressed() -> void:
 	DisplayServer.clipboard_set(Noray.oid)
 
 func _on_back_pressed() -> void:
+	$Choice/Name.text = $Connect/Name.text
 	if $Connect.visible:
-		$Choice/Name.text = $Connect/Name.text
 		$Connect.hide()
 		$Choice.show()
 	elif $Players.visible:
 		is_online = false
-		if GameManager.is_host:
-			if not multiplayer.get_peers().is_empty():
-				for peer in multiplayer.get_peers():
-					GameManager.unregister_player(peer)
-				multiplayer.server_disconnected.emit()
-			else:
-				GameManager.unregister_player(1)
-		else:
-			GameManager.unregister_player.rpc(multiplayer.get_unique_id())
+		if GameManager.is_host and not multiplayer.get_peers().is_empty():
+			for peer in multiplayer.get_peers():
+				multiplayer.multiplayer_peer.disconnect_peer(peer)
+		multiplayer.multiplayer_peer.close()
 		
 		
 func refresh_lobby():
@@ -123,7 +118,6 @@ func _on_game_error(errtxt):
 
 func _process(_delta: float) -> void:
 	if GameManager.server_started:
-		refresh_lobby()
 		$Players/Start.disabled = (not multiplayer.is_server() if multiplayer.get_peers().is_empty() else not (verify_ready() and multiplayer.is_server()))
 		$Players/Ready.disabled = (multiplayer.is_server() if multiplayer.get_peers().is_empty() else false)
 	else:
@@ -148,8 +142,7 @@ func _on_ready_toggled(toggled_on: bool) -> void:
 	
 	for player in GameManager.players.keys():
 		if GameManager.players[player]["in_game"]:
-			GameManager.join_game.rpc_id(1)
-			return
+			GameManager.load_world.rpc()
 	
 @rpc("any_peer", "call_local")
 func toggle_ready(toggle:bool):
@@ -161,4 +154,4 @@ func toggle_ready(toggle:bool):
 		GameManager.players[multiplayer.get_remote_sender_id()]["ready"] = false
 
 func _on_start_pressed() -> void:
-	GameManager.begin_game()
+	GameManager.load_world.rpc()
