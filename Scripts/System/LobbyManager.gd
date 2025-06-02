@@ -140,10 +140,6 @@ func _on_ready_toggled(toggled_on: bool) -> void:
 	ready_style.bg_color = (Color.LIME_GREEN if toggled_on else default_color)
 	$Players/Ready.add_theme_stylebox_override("pressed", ready_style)
 	
-	for player in GameManager.players.keys():
-		if GameManager.players[player]["in_game"]:
-			GameManager.load_world.rpc()
-	
 @rpc("any_peer", "call_local")
 func toggle_ready(toggle:bool):
 	if toggle:

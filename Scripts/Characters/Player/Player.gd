@@ -2,7 +2,6 @@ extends CharacterBody3D
 
 var speed:float
 
-@export var synced_position:Vector3
 var lantern_lit:bool
 var in_menu:bool
 
@@ -28,19 +27,16 @@ var last_known_pos:Array = []
 
 var data:Dictionary = {}
 
+
 func _ready() -> void:
-	position = synced_position
-	if str(name).is_valid_int():
-		get_node("Inputs/InputSynchronizer").set_multiplayer_authority(str(name).to_int())
-	camera.current = get_node("Inputs/InputSynchronizer").is_multiplayer_authority()
+	camera.current = is_multiplayer_authority()
 	sprite.hide()
 	hands.show()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	last_known_pos.append(position)
-	for player in GameManager.players.keys():
-		if GameManager.players[player] == GameManager.players[multiplayer.get_unique_id()]:
-			for _data in GameManager.players[player]["data"]:
-				set(str(_data), GameManager.players[player]["data"][_data])
+	if is_multiplayer_authority():
+		for _data in GameManager.players[int(name)]["data"]:
+			set(str(_data), GameManager.players[int(name)]["data"][_data])
 	
 func _process(_delta: float) -> void:
 	#Set player nametag:
@@ -76,7 +72,7 @@ func set_visibility():
 	hands.hide()
 
 func _physics_process(delta: float) -> void:	
-	if everyone_in_game() and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+	if multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
 		if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
 			# The client which this player represent will update the controls state, and notify it to everyone.
 			inputs.update(delta)
@@ -91,28 +87,15 @@ func _physics_process(delta: float) -> void:
 			toggle_mouse()
 			if Input.is_action_just_pressed("menu"):
 				in_menu = !in_menu
-				
-		if should_sync():
-			data = {"synced_position": position, 
-					"rotation": rotation, 
-					"lantern_lit": lantern_lit,
-					"in_menu": in_menu
-					}
-			for player in GameManager.players.keys():
-				if GameManager.players[player] == GameManager.players[multiplayer.get_unique_id()]:
-					GameManager.players[player]["data"] = data
-					
-		if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
-			# The server updates the position that will be notified to the clients.
-			synced_position = position
-			if last_known_pos[last_known_pos.size()-1] != position:
-				last_known_pos.append(position)
-				if last_known_pos.size() > 10:
-					last_known_pos.remove_at(0)
-						
-		elif should_sync():
-			position = synced_position
 		
+		if should_sync():
+			data = {"position": position, 
+				"rotation": rotation, 
+				"lantern_lit": lantern_lit,
+				"in_menu": in_menu
+				}
+			GameManager.players[int(name)]["data"] = data
+			
 		if !in_menu:
 			#handle sprint / player speed
 			speed = (14 if Input.is_action_pressed("sprint") and is_on_floor() else 7)
@@ -123,10 +106,7 @@ func _physics_process(delta: float) -> void:
 			move_and_slide()
 
 func should_sync() -> bool:
-	for pos in last_known_pos:
-		if pos != position and synced_position != position:
-			return true
-	if Input.is_action_just_pressed("menu") or Input.is_action_just_pressed("light"):
+	if Input.is_anything_pressed():
 		return true
 	return false
 
@@ -145,9 +125,3 @@ func camera_bob(delta:float):
 		bob_time += delta * idle_bob_speed
 		camera.position.y = 0.66 + sin(bob_time) * idle_bob_amount
 		hands.offset.y = -sin(bob_time) * idle_bob_amount * 100
-
-func everyone_in_game() -> bool:
-	for player in GameManager.players.keys():
-		if not GameManager.players[player]["in_game"]:
-			return false
-	return true

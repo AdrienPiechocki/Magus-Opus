@@ -1,5 +1,6 @@
 extends MeshInstance3D
 
+@export var npc:bool
 var mat:StandardMaterial3D
 var angle:float
 var pos:Vector3
@@ -26,43 +27,43 @@ var pos:Vector3
 
 var currentSide:int
 
-@onready var head = $"../Head"
-
 func _ready() -> void:
 	multiplayer.allow_object_decoding = true
 	mat = mesh.surface_get_material(0).duplicate()
 	
 func _physics_process(_delta: float) -> void:
-	if everyone_in_game() and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
-		update.rpc_id(int(get_parent().name))
-		for player in get_tree().get_nodes_in_group("Player"):
-			if player.name != get_parent().name:
-				pos = player.position.direction_to(global_position)
-				if abs(pos.x) < 0.5:
-					if pos.z > 0:
-						set_texture(player, [West, SouthWest, South, SouthEast, East, NorthEast, North, NorthWest])
-					elif pos.z < 0:
-						set_texture(player, [East, NorthEast, North, NorthWest, West, SouthWest, South, SouthEast])
-				elif pos.x > 0:
-					if abs(pos.z) < 0.5:
-						set_texture(player, [South, SouthEast, East, NorthEast, North, NorthWest, West, SouthWest])
-					elif pos.z > 0:
-						set_texture(player, [SouthWest, South, SouthEast, East, NorthEast, North, NorthWest, West])
-					elif pos.z < 0:
-						set_texture(player, [SouthEast, East, NorthEast, North, NorthWest, West, SouthWest, South])
-				elif pos.x < 0:
-					if abs(pos.z) < 0.5:
-						set_texture(player, [North, NorthWest, West, SouthWest, South, SouthEast, East, NorthEast])
-					elif pos.z > 0:
-						set_texture(player, [NorthWest, West, SouthWest, South, SouthEast, East, NorthEast, North])
-					elif pos.z < 0:
-						set_texture(player, [NorthEast, North, NorthWest, West, SouthWest, South, SouthEast, East])
+	if multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+		if !npc and GameManager.players[int(get_parent().name)]["in_game"]:
+			update.rpc_id(int(get_parent().name))
+			change()
+		elif npc:
+			update()
+			change()
 
-func everyone_in_game() -> bool:
-	for player in GameManager.players.keys():
-		if !GameManager.players[player]["in_game"]:
-			return false
-	return true
+func change():
+	for player in get_tree().get_nodes_in_group("Player"):
+		if player.name != get_parent().name:
+			pos = player.position.direction_to(global_position)
+			if abs(pos.x) < 0.5:
+				if pos.z > 0:
+					set_texture(player, [West, SouthWest, South, SouthEast, East, NorthEast, North, NorthWest])
+				elif pos.z < 0:
+					set_texture(player, [East, NorthEast, North, NorthWest, West, SouthWest, South, SouthEast])
+			elif pos.x > 0:
+				if abs(pos.z) < 0.5:
+					set_texture(player, [South, SouthEast, East, NorthEast, North, NorthWest, West, SouthWest])
+				elif pos.z > 0:
+					set_texture(player, [SouthWest, South, SouthEast, East, NorthEast, North, NorthWest, West])
+				elif pos.z < 0:
+					set_texture(player, [SouthEast, East, NorthEast, North, NorthWest, West, SouthWest, South])
+			elif pos.x < 0:
+				if abs(pos.z) < 0.5:
+					set_texture(player, [North, NorthWest, West, SouthWest, South, SouthEast, East, NorthEast])
+				elif pos.z > 0:
+					set_texture(player, [NorthWest, West, SouthWest, South, SouthEast, East, NorthEast, North])
+				elif pos.z < 0:
+					set_texture(player, [NorthEast, North, NorthWest, West, SouthWest, South, SouthEast, East])
+
 
 func set_texture(player, order:Array):
 	if sideToMaterial[currentSide] == North:

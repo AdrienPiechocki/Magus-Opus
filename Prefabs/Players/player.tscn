@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://c2hga5cenvr6p"]
+[gd_scene load_steps=18 format=3 uid="uid://c2hga5cenvr6p"]
 
 [ext_resource type="Script" uid="uid://bqp2k3u1nrftl" path="res://Scripts/Characters/Player/Player.gd" id="1_44qme"]
 [ext_resource type="Material" uid="uid://olgu1usxguoa" path="res://Graphics/materials/Player.tres" id="2_udiyv"]
@@ -22,23 +22,18 @@ material = ExtResource("2_udiyv")
 size = Vector2(2, 2)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2xbkd"]
-properties/0/path = NodePath(".:synced_position")
+properties/0/path = NodePath("Sprite:mat")
 properties/0/spawn = true
 properties/0/replication_mode = 1
-properties/1/path = NodePath("Sprite:mat")
+properties/1/path = NodePath("Head/Lantern:light_energy")
 properties/1/spawn = true
 properties/1/replication_mode = 1
-properties/2/path = NodePath("Head/Lantern:light_energy")
+properties/2/path = NodePath("Head:rotation")
 properties/2/spawn = true
 properties/2/replication_mode = 1
-properties/3/path = NodePath("Head:rotation")
+properties/3/path = NodePath(".:position")
 properties/3/spawn = true
 properties/3/replication_mode = 1
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_3vpsw"]
-properties/0/path = NodePath(".:motion")
-properties/0/spawn = true
-properties/0/replication_mode = 1
 
 [node name="Player" type="CharacterBody3D" groups=["Player"]]
 collision_layer = 0
@@ -102,9 +97,6 @@ replication_config = SubResource("SceneReplicationConfig_2xbkd")
 
 [node name="Inputs" type="Node" parent="."]
 script = ExtResource("12_havlv")
-
-[node name="InputSynchronizer" type="MultiplayerSynchronizer" parent="Inputs"]
-replication_config = SubResource("SceneReplicationConfig_3vpsw")
 
 [node name="UserInterface" parent="." instance=ExtResource("14_c6tfb")]
 visible = false

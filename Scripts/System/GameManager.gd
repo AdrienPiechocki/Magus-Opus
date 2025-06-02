@@ -11,8 +11,7 @@ var peer:ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 var is_host:bool = false
 var external_oid:String = ""
 @export var server_started:bool = false
-var can_connect:bool = true
-var join_in_game:bool = false
+@export var join_in_game:bool = false
 
 # Name for my player.
 var player_name:String = "Player"
@@ -46,9 +45,19 @@ func _ready():
 func _process(_delta: float) -> void:
 	if not players.keys().is_empty():
 		server_started = true
+		var flag1 = false
+		var flag2 = false
+		for player in GameManager.players.keys():
+			if not GameManager.players[player]["in_game"]:
+				flag1 = true
+			else:
+				flag2 = true
+		if flag1 and flag2:
+			join_in_game = true
 	else:
 		server_started = false
-
+		join_in_game = false
+		
 func _player_connected(id):
 	print("player connected")
 	register_player.rpc_id(id, player_name)
@@ -57,6 +66,7 @@ func _player_connected(id):
 
 func _player_disconnected(id):
 	print("player disconnected")
+	
 	if players[id]["in_game"]:
 		game_error.emit("Player " + players[id]["name"] + " disconnected")
 		remove_player(id)
@@ -85,17 +95,18 @@ func _connected_fail():
 @rpc("any_peer", "call_local")
 func register_player(new_player_name):
 	var id = multiplayer.get_remote_sender_id()
+	if id in players.keys():
+		return
 	players[id] = {"name": new_player_name, 
 					"ready": false, 
 					"in_game": false, 
-					"data": {"synced_position": Vector3(0, 1, 0),
+					"data": {"position": Vector3(0, 1, 0),
 							"rotation": Vector3(0, 0, 0),
 							"lantern_lit": false,
 							"in_menu": false
 						}
 				}
 	print("Player ", new_player_name, " connected with ID ", id)
-	
 	
 @rpc("any_peer", "call_local")
 func unregister_player(id):
@@ -137,6 +148,11 @@ func join_game_local(ip, new_player_name):
 		return err
 	multiplayer.multiplayer_peer = peer
 	print(player_name, " joined game")
+	await players_list_changed
+	for player in GameManager.players.keys():
+		if GameManager.players[player]["in_game"]:
+			load_world()
+			return
 	
 func join_game_noray(oid, new_player_name):
 	player_name = new_player_name
@@ -155,41 +171,16 @@ func get_player_name():
 
 @rpc("any_peer", "call_local")
 func load_world():
-	#if scene exists, delete it
-	if get_tree().get_root().has_node("World"):
-		get_tree().get_root().get_node("World").free()
-	# load scene
-	var _world = world.instantiate()
-	get_tree().get_root().add_child(_world)
-	get_tree().get_root().get_node("Lobby").hide()
-	if multiplayer.is_server():
-		spawn_players()
-
-func spawn_players():
-	var _world = get_tree().get_root().get_node("World")
-	var spawns:Array = []
-	for p:int in players.keys():
-		spawns.append(p)
-	
-	for p_id: int in spawns:
-		var player = player_scene.instantiate()
-		for data in players[p_id]["data"]:
-			player.set(str(data), players[p_id]["data"][data])
-			print(p_id, "  ", player.get(str(data)))
-		player.name = str(p_id)
-		_world.get_node("Players").add_child(player, true)
-		print("spawned player with id: ", player.name)
-		
 	for player in players.keys():
 		players[player]["in_game"] = true
-
+		players[player]["ready"] = true
+	get_tree().change_scene_to_file("res://Scenes/World.tscn")
 
 func end_game():
 	for player in players.keys():
 		if player == multiplayer.get_remote_sender_id():
 			players[player]["in_game"] = false
-	if get_tree().get_root().has_node("World"):
-		get_tree().get_root().get_node("World").queue_free()
+	get_tree().change_scene_to_file("res://Scenes/Lobby.tscn")
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	game_ended.emit()
 	players.clear()

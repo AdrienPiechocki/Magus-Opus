@@ -33,6 +33,7 @@ shape = SubResource("CapsuleShape3D_nrg37")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("QuadMesh_whts2")
 script = ExtResource("3_tgh55")
+npc = true
 North = ExtResource("4_phvsa")
 NorthEast = ExtResource("4_yxwh2")
 East = ExtResource("5_k0a86")
