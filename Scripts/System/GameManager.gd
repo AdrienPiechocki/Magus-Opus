@@ -99,6 +99,7 @@ func register_player(new_player_name):
 	if id in players.keys():
 		return
 	players[id] = {"name": new_player_name, 
+					"solo": false,
 					"ready": false, 
 					"in_game": false, 
 					"data": {"position": Vector3(0, 1, 0),

@@ -17,7 +17,16 @@ func _ready():
 
 func _on_solo_pressed() -> void:
 	var player_name = $Choice/Name.text 
-	GameManager.host_game_local(player_name)
+	GameManager.players = {1: {"name": player_name, 
+								"solo": true,
+								"ready": false, 
+								"in_game": false, 
+								"data": {"position": Vector3(0, 1, 0),
+										"rotation": Vector3(0, 0, 0),
+										"lantern_lit": false,
+										"in_menu": false
+									}
+							}}
 	GameManager.load_world()
 
 func _on_lan_pressed() -> void:
