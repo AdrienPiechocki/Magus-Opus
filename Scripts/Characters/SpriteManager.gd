@@ -33,7 +33,7 @@ func _ready() -> void:
 	
 func _physics_process(_delta: float) -> void:
 	if multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
-		if !npc and GameManager.players[int(get_parent().name)]["in_game"]:
+		if !npc and int(get_parent().name) in GameManager.players.keys() and GameManager.players[int(get_parent().name)]["in_game"]:
 			update.rpc_id(int(get_parent().name))
 			change()
 		elif npc:

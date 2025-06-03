@@ -69,7 +69,7 @@ func _player_disconnected(id):
 	
 	if players[id]["in_game"]:
 		game_error.emit("Player " + players[id]["name"] + " disconnected")
-		remove_player(id)
+	remove_player(id)
 	unregister_player.rpc(id)
 	await get_tree().create_timer(0.1).timeout
 	players_list_changed.emit()
@@ -171,11 +171,11 @@ func get_player_name():
 
 @rpc("any_peer", "call_local")
 func load_world():
+	get_tree().change_scene_to_file("res://Scenes/World.tscn")
 	for player in players.keys():
 		players[player]["in_game"] = true
 		players[player]["ready"] = true
-	get_tree().change_scene_to_file("res://Scenes/World.tscn")
-
+	
 func end_game():
 	for player in players.keys():
 		if player == multiplayer.get_remote_sender_id():
