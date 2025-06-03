@@ -94,6 +94,7 @@ func _physics_process(delta: float) -> void:
 			if Input.is_action_just_pressed("menu"):
 				in_menu = !in_menu
 		
+		#data synchronization:
 		if should_sync():
 			data = {"position": position, 
 				"rotation": rotation, 
@@ -101,16 +102,17 @@ func _physics_process(delta: float) -> void:
 				"in_menu": in_menu
 				}
 			GameManager.players[int(name)]["data"] = data
+		#backup last known positions
 			if delay >= 0.5:
 				delay = 0.0
 				backup_position(3)
-		delay += delta
+		if delay <= 0.5:
+			delay += delta
 			
 		if is_multiplayer_authority():
 			synced_position = position
 		else:
 			position = synced_position
-
 		
 		if out_of_bounds():
 			position = position_backup()

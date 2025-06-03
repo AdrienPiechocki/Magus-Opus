@@ -27,6 +27,7 @@ func update(delta: float):
 		movement_dir.y = 2
 	else:
 		movement_dir.y = 0
+
 	#movment based on player orientation
 	movement_dir = get_parent().basis * movement_dir
 	
