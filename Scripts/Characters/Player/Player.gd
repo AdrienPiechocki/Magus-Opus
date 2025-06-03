@@ -24,9 +24,13 @@ var idle_bob_amount:float = 0.02
 var flicker_amount:float = 0.2
 
 var last_known_pos:Array = []
+var delay:float = 0.0
 
 var data:Dictionary = {}
 
+var deadzone:Vector3 = Vector3(50, -10, 50)
+var spawn:Vector3
+var recent_calls:Array = []
 
 func _ready() -> void:
 	camera.current = is_multiplayer_authority()
@@ -38,6 +42,7 @@ func _ready() -> void:
 		for _data in GameManager.players[int(name)]["data"]:
 			set(str(_data), GameManager.players[int(name)]["data"][_data])
 	synced_position = position
+	spawn = position
 	
 func _process(_delta: float) -> void:
 	#Set player nametag:
@@ -96,9 +101,19 @@ func _physics_process(delta: float) -> void:
 				"in_menu": in_menu
 				}
 			GameManager.players[int(name)]["data"] = data
+			if delay >= 0.5:
+				delay = 0.0
+				backup_position(3)
+		delay += delta
+			
+		if is_multiplayer_authority():
 			synced_position = position
 		else:
 			position = synced_position
+
+		
+		if out_of_bounds():
+			position = position_backup()
 			
 		if !in_menu:
 			#handle sprint / player speed
@@ -113,6 +128,41 @@ func should_sync() -> bool:
 	if Input.is_anything_pressed():
 		return true
 	return false
+
+func backup_position(size:int):
+	last_known_pos.append(position)
+	if last_known_pos.size() > size:
+		last_known_pos.remove_at(0)
+
+func out_of_bounds() -> bool:
+	if position.y < deadzone.y:
+		return true
+	elif position.x < -deadzone.x or position.x > deadzone.x:
+		return true
+	elif position.z < -deadzone.z or position.z > deadzone.z:
+		return true
+	else:
+		return false
+
+func called_recently(interval:float, maximum:int) -> bool:
+	var now = Time.get_ticks_msec() / 1000.0  # secondes
+	recent_calls.append(now)
+	recent_calls = recent_calls.filter(func(t):
+		return now - t <= interval
+	)
+	return recent_calls.size() > maximum
+
+func position_backup() -> Vector3:
+	var list = last_known_pos
+	list.reverse()
+	if called_recently(0.5, 2):
+		return spawn
+	for pos in list:
+		if pos.x < deadzone.x and pos.x > -deadzone.x:
+			if pos.y > deadzone.y:
+				if pos.z < deadzone.z and pos.z > -deadzone.z:
+					return pos
+	return spawn
 
 func toggle_mouse():
 	if in_menu:
