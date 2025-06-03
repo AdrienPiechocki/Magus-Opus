@@ -45,6 +45,7 @@ func _ready():
 func _process(_delta: float) -> void:
 	if not players.keys().is_empty():
 		server_started = true
+		
 		var flag1 = false
 		var flag2 = false
 		for player in GameManager.players.keys():
@@ -140,6 +141,8 @@ func host_game_noray(new_player_name):
 	_player_connected(1)
 	
 func join_game_local(ip, new_player_name):
+	var timer = get_tree().create_timer(5.0)
+	timer.timeout.connect(timeout)
 	player_name = new_player_name
 	var err = peer.create_client(ip, DEFAULT_PORT)
 	if err:
@@ -153,7 +156,11 @@ func join_game_local(ip, new_player_name):
 		if GameManager.players[player]["in_game"]:
 			load_world()
 			return
-	
+
+func timeout():
+	if multiplayer.get_unique_id() not in players.keys():
+		multiplayer.multiplayer_peer.close()
+
 func join_game_noray(oid, new_player_name):
 	player_name = new_player_name
 	Noray.connect_nat(oid)

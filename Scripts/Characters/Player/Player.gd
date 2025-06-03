@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
 var speed:float
-
+@export var synced_position:Vector3
 var lantern_lit:bool
 var in_menu:bool
 
@@ -37,6 +37,7 @@ func _ready() -> void:
 	if is_multiplayer_authority():
 		for _data in GameManager.players[int(name)]["data"]:
 			set(str(_data), GameManager.players[int(name)]["data"][_data])
+	synced_position = position
 	
 func _process(_delta: float) -> void:
 	#Set player nametag:
@@ -95,6 +96,9 @@ func _physics_process(delta: float) -> void:
 				"in_menu": in_menu
 				}
 			GameManager.players[int(name)]["data"] = data
+			synced_position = position
+		else:
+			position = synced_position
 			
 		if !in_menu:
 			#handle sprint / player speed
