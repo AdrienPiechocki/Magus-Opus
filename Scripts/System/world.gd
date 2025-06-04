@@ -9,7 +9,7 @@ func _ready():
 			spawn_player(1, GameManager.players[1]["data"])
 		else: 
 			for id in GameManager.non_server_players:
-				spawn_player(id, GameManager.players[id]["data"])
+				spawn_player.rpc(id, GameManager.players[id]["data"])
 			
 	elif GameManager.join_in_game:
 		request_spawn.rpc_id(1, multiplayer.get_unique_id())
@@ -24,7 +24,7 @@ func _spawn_player_for_all(id: int):
 	if multiplayer.is_server():
 		spawn_player(id, data)   # server side
 
-@rpc("any_peer")
+@rpc("any_peer", "call_local")
 func spawn_player(id: int, data: Dictionary):
 	if players_node.has_node(str(id)):
 		print("Player already exists, ID: ", id)
@@ -59,4 +59,4 @@ func request_spawn(id: int):
 		if pid != id and GameManager.players[pid]["in_game"]:
 			spawn_player.rpc_id(id, pid, GameManager.players[pid]["data"])
 	GameManager.players[id]["in_game"] = true
-	_spawn_player_for_all(id)
+	spawn_player.rpc(id, GameManager.players[id]["data"])

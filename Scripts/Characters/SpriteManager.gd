@@ -1,7 +1,6 @@
 extends MeshInstance3D
 
 @export var npc:bool
-@export var synced_mat:StandardMaterial3D
 var mat:StandardMaterial3D = StandardMaterial3D.new()
 var angle:float
 var pos:Vector3
@@ -31,22 +30,10 @@ var currentSide:int
 func _ready() -> void:
 	multiplayer.allow_object_decoding = true
 	mat = mesh.surface_get_material(0).duplicate()
-	synced_mat = mat
 	
 func _process(_delta: float) -> void:
-	if get_parent().is_multiplayer_authority():
-		synced_mat = mat
-	else:
-		mat = synced_mat
-
-func _physics_process(_delta: float) -> void:
-	if multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
-		if !npc and int(get_parent().name) in GameManager.non_server_players and get_tree().get_root().has_node("World"):
-			update.rpc_id(int(get_parent().name))
-			change()
-		elif npc:
-			update()
-			change()
+	update.rpc_id(int(get_parent().name))
+	change()
 
 func change():
 	for player in get_tree().get_nodes_in_group("Player"):

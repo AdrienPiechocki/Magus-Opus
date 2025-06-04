@@ -1,7 +1,6 @@
-[gd_scene load_steps=13 format=3 uid="uid://glwqiwjnwmpc"]
+[gd_scene load_steps=12 format=3 uid="uid://glwqiwjnwmpc"]
 
 [ext_resource type="Shader" uid="uid://om51lt5o24gl" path="res://Graphics/Shaders/Sky.gdshader" id="1_5nsto"]
-[ext_resource type="Script" uid="uid://4mq50i0au7xs" path="res://Scripts/System/world.gd" id="1_p70al"]
 [ext_resource type="Texture2D" uid="uid://cjhdq0dp885un" path="res://Graphics/textures/moon.png" id="2_gjpho"]
 [ext_resource type="PackedScene" uid="uid://cwng1l8d3835m" path="res://Prefabs/NPCs/npc.tscn" id="2_j0p05"]
 [ext_resource type="PackedScene" uid="uid://bnx47e30r6hws" path="res://Prefabs/World/level.tscn" id="3_p70al"]
@@ -59,7 +58,6 @@ volumetric_fog_enabled = true
 volumetric_fog_sky_affect = 0.8
 
 [node name="World" type="Node3D"]
-script = ExtResource("1_p70al")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_jjvhh")

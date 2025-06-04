@@ -55,7 +55,7 @@ func _process(_delta: float) -> void:
 			if player.name != name:
 				set_player_name.rpc_id(int(player.name))
 				set_visibility.rpc_id(int(player.name))
-
+	
 	
 @rpc("any_peer", "call_local")
 func toggle_lantern():
@@ -112,7 +112,7 @@ func _physics_process(delta: float) -> void:
 		if delay <= 0.5:
 			delay += delta
 			
-		if is_multiplayer_authority():
+		if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
 			synced_position = position
 		else:
 			position = synced_position
