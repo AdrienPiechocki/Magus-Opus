@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cpt57vvfrh4bm"
 path.s3tc="res://.godot/imported/Player_E.png-eafcd8e3478596bf321058f285f34c2d.s3tc.ctex"
+path.etc2="res://.godot/imported/Player_E.png-eafcd8e3478596bf321058f285f34c2d.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Graphics/textures/Player/Idle/Player_E.png"
-dest_files=["res://.godot/imported/Player_E.png-eafcd8e3478596bf321058f285f34c2d.s3tc.ctex"]
+dest_files=["res://.godot/imported/Player_E.png-eafcd8e3478596bf321058f285f34c2d.s3tc.ctex", "res://.godot/imported/Player_E.png-eafcd8e3478596bf321058f285f34c2d.etc2.ctex"]
 
 [params]
 

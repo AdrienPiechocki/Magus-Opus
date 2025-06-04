@@ -9,10 +9,11 @@ func _ready() -> void:
 	environement.environment.ambient_light_color = Color(brightness.value, brightness.value, brightness.value)
 
 func _on_exit_pressed() -> void:
-	if GameManager.players[1]["solo"]:
-		GameManager.end_game()
-	else:
-		multiplayer.multiplayer_peer.close()
+	for player in GameManager.players:
+		if GameManager.players[player]["solo"]:
+			GameManager.end_game()
+			return
+	multiplayer.multiplayer_peer.close()
 	
 func _on_back_pressed() -> void:
 	$".".hide()

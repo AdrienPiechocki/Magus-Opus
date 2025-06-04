@@ -79,3 +79,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1, 0)
 orientation = 45.0
 
 [node name="Players" type="Node3D" parent="."]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://c2hga5cenvr6p")
+spawn_path = NodePath("../Players")

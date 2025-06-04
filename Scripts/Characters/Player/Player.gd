@@ -32,6 +32,9 @@ var deadzone:Vector3 = Vector3(50, -10, 50)
 var spawn:Vector3
 var recent_calls:Array = []
 
+func _enter_tree() -> void:
+	set_multiplayer_authority(int(name))
+
 func _ready() -> void:
 	camera.current = is_multiplayer_authority()
 	sprite.hide()
@@ -45,7 +48,7 @@ func _ready() -> void:
 	spawn = position
 	
 func _process(_delta: float) -> void:
-	#Set player nametag:
+	#Set player nametag and other players visibility:
 	if not GameManager.get_player_list().is_empty() and not is_name_set:
 		is_name_set = true
 		for player in get_tree().get_nodes_in_group("Player"):
@@ -120,7 +123,7 @@ func _physics_process(delta: float) -> void:
 		if !in_menu:
 			#handle sprint / player speed
 			speed = (14 if Input.is_action_pressed("sprint") and is_on_floor() else 7)
-		
+			
 			#handle movement
 			velocity = inputs.motion * speed
 			

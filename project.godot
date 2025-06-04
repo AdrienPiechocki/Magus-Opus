@@ -99,4 +99,5 @@ limits/tcp/connect_timeout_seconds=5
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
+textures/vram_compression/import_etc2_astc=true
 environment/volumetric_fog/volume_size=256

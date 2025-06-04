@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bdw3ul5g2f4ke"
 path.s3tc="res://.godot/imported/GuardNorth.png-2b0267507eea545a0965e0f759170702.s3tc.ctex"
+path.etc2="res://.godot/imported/GuardNorth.png-2b0267507eea545a0965e0f759170702.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Graphics/textures/Guard/GuardNorth.png"
-dest_files=["res://.godot/imported/GuardNorth.png-2b0267507eea545a0965e0f759170702.s3tc.ctex"]
+dest_files=["res://.godot/imported/GuardNorth.png-2b0267507eea545a0965e0f759170702.s3tc.ctex", "res://.godot/imported/GuardNorth.png-2b0267507eea545a0965e0f759170702.etc2.ctex"]
 
 [params]
 

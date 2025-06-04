@@ -5,52 +5,58 @@ var player_scene: PackedScene = preload("res://Prefabs/Players/player.tscn")
 
 func _ready():
 	if multiplayer.is_server():
-		# Spawn tous les joueurs déjà en jeu au lancement serveur
-		for id in GameManager.players.keys():
-			if GameManager.players[id]["in_game"]:
+		if GameManager.players[1]["solo"]:
+			spawn_player(1, GameManager.players[1]["data"])
+		else: 
+			for id in GameManager.non_server_players:
 				spawn_player(id, GameManager.players[id]["data"])
-	else:
-		# Client demande à rejoindre
-		rpc_id(1, "request_spawn", multiplayer.get_unique_id())
-
-# Crée un joueur côté serveur et prévient tous les clients
+			
+	elif GameManager.join_in_game:
+		request_spawn.rpc_id(1, multiplayer.get_unique_id())
+		
+		
 func _spawn_player_for_all(id: int):
-	spawn_player.rpc(id, GameManager.players[id]["data"])
+	if not GameManager.players.has(id):
+		push_warning("ID ", id, " not found")
+		return
+	var data = GameManager.players[id]["data"]
+	spawn_player.rpc(id, data)  # client side
+	if multiplayer.is_server():
+		spawn_player(id, data)   # server side
 
-# RPC : spawn le joueur côté client
 @rpc("any_peer")
 func spawn_player(id: int, data: Dictionary):
+	if players_node.has_node(str(id)):
+		print("Player already exists, ID: ", id)
+		return
 	var player = player_scene.instantiate()
 	for key in data:
 		player.set(str(key), data[key])
 	player.set_multiplayer_authority(id)
 	player.name = str(id)
-	players_node.add_child(player)
-	print("Player spawned locally with id:", id)
-
-# RPC : spawn le joueur côté client
-@rpc("any_peer", "call_local")
-func spawn_player2(id: int, data: Dictionary):
-	var player = player_scene.instantiate()
-	for key in data:
-		player.set(str(key), data[key])
-	player.set_multiplayer_authority(id)
-	player.name = str(id)
-	players_node.add_child(player)
-	print("Player spawned locally with id:", id)
+	players_node.add_child.call_deferred(player)
+	print("Player spawned with ID: ", id)
 
 
-# Client demande au serveur de spawn son joueur
 @rpc("any_peer")
 func request_spawn(id: int):
-	# Serveur met à jour la liste des joueurs s’il faut
-	# (exemple simple, ici on suppose qu'il existe déjà)
-	print("Spawn request received for id:", id)
-	if GameManager.join_in_game:
-		spawn_player2.rpc(id, GameManager.players[id]["data"])
-	else:
-		spawn_player.rpc(id, GameManager.players[id]["data"])
-	# Envoie au nouveau client la liste des autres joueurs déjà présents
-	for pid in GameManager.players.keys():
-		if GameManager.players[pid]["in_game"] and pid != id:
+	if not multiplayer.is_server():
+		print("ERROR : request spawn called from client !")
+		return
+
+	print("Recived spawn request for ID :", id)
+
+	if not GameManager.players.has(id):
+		push_warning("ID ", id, " unknown")
+		return
+
+	if GameManager.players[id].get("in_game", false):
+		print("Player with ID ", id, " is already in game")
+		return
+		
+	# New client recives other players in game:
+	for pid in GameManager.non_server_players:
+		if pid != id and GameManager.players[pid]["in_game"]:
 			spawn_player.rpc_id(id, pid, GameManager.players[pid]["data"])
+	GameManager.players[id]["in_game"] = true
+	_spawn_player_for_all(id)

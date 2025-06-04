@@ -18,6 +18,7 @@ var player_name:String = "Player"
 
 # Names for remote players in id:name format.
 @export var players:Dictionary = {}
+@export var non_server_players:Array 
 
 var world:PackedScene = preload("res://Scenes/World.tscn")
 var player_scene:PackedScene = preload("res://Prefabs/Players/player.tscn")
@@ -30,11 +31,12 @@ signal game_error(what)
 signal players_list_changed()
 
 func _ready():
-	Noray.on_connect_to_host.connect(_connected_ok_noray)
-	Noray.on_connect_nat.connect(handle_nat_connection)
-	Noray.on_connect_relay.connect(handle_relay_connection)
-	
-	Noray.connect_to_host(NORAY_ADDRESS, DEFAULT_PORT)
+	if OS.has_feature("dedicated_server"):
+		host_game_local("server")
+		players[1]["dedicated_server"] = true
+		players[1]["ready"] = true
+		load_world.call_deferred()
+		print("server running")
 	
 	multiplayer.peer_connected.connect(_player_connected)
 	multiplayer.peer_disconnected.connect(_player_disconnected)
@@ -43,6 +45,16 @@ func _ready():
 	multiplayer.server_disconnected.connect(_server_disconnected)
 
 func _process(_delta: float) -> void:
+	non_server_players = players.keys().filter(func(id): return !players[id]["dedicated_server"])
+	if OS.has_feature("dedicated_server") and server_started:
+		if check_ready():
+			for player in players.keys():
+				if not players[player]["in_game"] and not players[player]["dedicated_server"]:
+					print("load world for ", player)
+					players[player]["in_game"] = true
+					join_in_game = true
+					load_world.rpc_id(player)
+					
 	if not players.keys().is_empty():
 		server_started = true
 		
@@ -59,6 +71,13 @@ func _process(_delta: float) -> void:
 		server_started = false
 		join_in_game = false
 		
+
+func check_ready() -> bool:
+	for player in non_server_players:
+		if not players[player]["ready"]:
+			return false
+	return true
+
 func _player_connected(id):
 	print("player connected")
 	register_player.rpc_id(id, player_name)
@@ -100,6 +119,7 @@ func register_player(new_player_name):
 		return
 	players[id] = {"name": new_player_name, 
 					"solo": false,
+					"dedicated_server": false,
 					"ready": false, 
 					"in_game": false, 
 					"data": {"position": Vector3(0, 1, 0),
@@ -153,8 +173,8 @@ func join_game_local(ip, new_player_name):
 	multiplayer.multiplayer_peer = peer
 	print(player_name, " joined game")
 	await players_list_changed
-	for player in GameManager.players.keys():
-		if GameManager.players[player]["in_game"]:
+	for player in players.keys():
+		if players[player]["in_game"]:
 			load_world()
 			return
 
@@ -179,16 +199,19 @@ func get_player_name():
 
 @rpc("any_peer", "call_local")
 func load_world():
-	get_tree().change_scene_to_file("res://Scenes/World.tscn")
-	for player in players.keys():
+	for player in players:
 		players[player]["in_game"] = true
 		players[player]["ready"] = true
+	var _world = world.instantiate()
+	if get_tree().get_root().has_node("World"):
+		get_tree().get_root().get_node("World").free()
+	get_tree().get_root().add_child(_world)
+	get_tree().get_root().get_node("Lobby").hide()
 	
 func end_game():
-	for player in players.keys():
-		if player == multiplayer.get_remote_sender_id():
-			players[player]["in_game"] = false
-	get_tree().change_scene_to_file("res://Scenes/Lobby.tscn")
+	if get_tree().get_root().has_node("World"):
+		get_tree().get_root().get_node("World").queue_free()
+	get_tree().get_root().get_node("Lobby").show()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	game_ended.emit()
 	players.clear()

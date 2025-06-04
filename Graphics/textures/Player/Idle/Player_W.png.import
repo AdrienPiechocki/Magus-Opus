@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b3122ebgkgy5"
 path.s3tc="res://.godot/imported/Player_W.png-0916fb8baa9fee5148eb7090088d1120.s3tc.ctex"
+path.etc2="res://.godot/imported/Player_W.png-0916fb8baa9fee5148eb7090088d1120.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Graphics/textures/Player/Idle/Player_W.png"
-dest_files=["res://.godot/imported/Player_W.png-0916fb8baa9fee5148eb7090088d1120.s3tc.ctex"]
+dest_files=["res://.godot/imported/Player_W.png-0916fb8baa9fee5148eb7090088d1120.s3tc.ctex", "res://.godot/imported/Player_W.png-0916fb8baa9fee5148eb7090088d1120.etc2.ctex"]
 
 [params]
 
