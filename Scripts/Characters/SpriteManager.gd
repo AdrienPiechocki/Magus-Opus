@@ -31,30 +31,63 @@ func _ready() -> void:
 	mat = mesh.surface_get_material(0).duplicate()
 	
 func _process(_delta: float) -> void:
-	if multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+	if 1 in GameManager.players and GameManager.players[1]["solo"]:
+		angle = round_to_dec(get_parent().rotation_degrees.y, 1)
+		set_orientation(angle)
+		change_solo()
+		
+	elif multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
 		update.rpc_id(int(get_parent().name))
-		for player in get_tree().get_nodes_in_group("Player"):
-			if player.name != get_parent().name:
-				pos = player.position.direction_to(global_position)
-				if abs(pos.x) < 0.5:
-					if pos.z > 0:
-						set_texture(player, [West, SouthWest, South, SouthEast, East, NorthEast, North, NorthWest])
-					elif pos.z < 0:
-						set_texture(player, [East, NorthEast, North, NorthWest, West, SouthWest, South, SouthEast])
-				elif pos.x > 0:
-					if abs(pos.z) < 0.5:
-						set_texture(player, [South, SouthEast, East, NorthEast, North, NorthWest, West, SouthWest])
-					elif pos.z > 0:
-						set_texture(player, [SouthWest, South, SouthEast, East, NorthEast, North, NorthWest, West])
-					elif pos.z < 0:
-						set_texture(player, [SouthEast, East, NorthEast, North, NorthWest, West, SouthWest, South])
-				elif pos.x < 0:
-					if abs(pos.z) < 0.5:
-						set_texture(player, [North, NorthWest, West, SouthWest, South, SouthEast, East, NorthEast])
-					elif pos.z > 0:
-						set_texture(player, [NorthWest, West, SouthWest, South, SouthEast, East, NorthEast, North])
-					elif pos.z < 0:
-						set_texture(player, [NorthEast, North, NorthWest, West, SouthWest, South, SouthEast, East])
+		change()
+
+func change():
+	for player in get_tree().get_nodes_in_group("Player"):
+		if player.name != get_parent().name:
+			pos = player.position.direction_to(global_position)
+			if abs(pos.x) < 0.5:
+				if pos.z > 0:
+					set_texture(player, [West, SouthWest, South, SouthEast, East, NorthEast, North, NorthWest])
+				elif pos.z < 0:
+					set_texture(player, [East, NorthEast, North, NorthWest, West, SouthWest, South, SouthEast])
+			elif pos.x > 0:
+				if abs(pos.z) < 0.5:
+					set_texture(player, [South, SouthEast, East, NorthEast, North, NorthWest, West, SouthWest])
+				elif pos.z > 0:
+					set_texture(player, [SouthWest, South, SouthEast, East, NorthEast, North, NorthWest, West])
+				elif pos.z < 0:
+					set_texture(player, [SouthEast, East, NorthEast, North, NorthWest, West, SouthWest, South])
+			elif pos.x < 0:
+				if abs(pos.z) < 0.5:
+					set_texture(player, [North, NorthWest, West, SouthWest, South, SouthEast, East, NorthEast])
+				elif pos.z > 0:
+					set_texture(player, [NorthWest, West, SouthWest, South, SouthEast, East, NorthEast, North])
+				elif pos.z < 0:
+					set_texture(player, [NorthEast, North, NorthWest, West, SouthWest, South, SouthEast, East])
+
+func change_solo():
+	for player in get_tree().get_nodes_in_group("Player"):
+		if player.name != get_parent().name:
+			pos = player.position.direction_to(global_position)
+			if abs(pos.x) < 0.5:
+				if pos.z > 0:
+					set_texture_solo([West, SouthWest, South, SouthEast, East, NorthEast, North, NorthWest])
+				elif pos.z < 0:
+					set_texture_solo([East, NorthEast, North, NorthWest, West, SouthWest, South, SouthEast])
+			elif pos.x > 0:
+				if abs(pos.z) < 0.5:
+					set_texture_solo([South, SouthEast, East, NorthEast, North, NorthWest, West, SouthWest])
+				elif pos.z > 0:
+					set_texture_solo([SouthWest, South, SouthEast, East, NorthEast, North, NorthWest, West])
+				elif pos.z < 0:
+					set_texture_solo([SouthEast, East, NorthEast, North, NorthWest, West, SouthWest, South])
+			elif pos.x < 0:
+				if abs(pos.z) < 0.5:
+					set_texture_solo([North, NorthWest, West, SouthWest, South, SouthEast, East, NorthEast])
+				elif pos.z > 0:
+					set_texture_solo([NorthWest, West, SouthWest, South, SouthEast, East, NorthEast, North])
+				elif pos.z < 0:
+					set_texture_solo([NorthEast, North, NorthWest, West, SouthWest, South, SouthEast, East])
+
 
 func set_texture(player, order:Array):
 	if sideToMaterial[currentSide] == North:
@@ -73,6 +106,25 @@ func set_texture(player, order:Array):
 		change_texture.rpc_id(int(player.name), order[6])
 	elif sideToMaterial[currentSide] == NorthWest:
 		change_texture.rpc_id(int(player.name), order[7])
+
+func set_texture_solo(order:Array):
+	if sideToMaterial[currentSide] == North:
+		change_texture(order[0])
+	elif sideToMaterial[currentSide] == NorthEast:
+		change_texture(order[1])
+	elif sideToMaterial[currentSide] == East:
+		change_texture(order[2])
+	elif sideToMaterial[currentSide] == SouthEast:
+		change_texture(order[3])
+	elif sideToMaterial[currentSide] == South:
+		change_texture(order[4])
+	elif sideToMaterial[currentSide] == SouthWest:
+		change_texture(order[5])
+	elif sideToMaterial[currentSide] == West:
+		change_texture(order[6])
+	elif sideToMaterial[currentSide] == NorthWest:
+		change_texture(order[7])
+
 
 @rpc("any_peer", "call_local")
 func update():

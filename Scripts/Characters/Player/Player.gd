@@ -32,15 +32,22 @@ var spawn:Vector3
 var recent_calls:Array = []
 
 func _enter_tree() -> void:
-	set_multiplayer_authority(int(name))
+	if GameManager.players[1]["solo"]:
+		get_node("MultiplayerSynchronizer").free()
+	else:
+		set_multiplayer_authority(int(name))
+		
 
 func _ready() -> void:
-	camera.current = is_multiplayer_authority()
+	if GameManager.players[1]["solo"]:
+		camera.current = true
+	else:
+		camera.current = is_multiplayer_authority()
 	sprite.hide()
 	hands.show()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	last_known_pos.append(position)
-	if is_multiplayer_authority():
+	if GameManager.players[1]["solo"] or is_multiplayer_authority():
 		for _data in GameManager.players[int(name)]["data"]:
 			set(str(_data), GameManager.players[int(name)]["data"][_data])
 	spawn = position
@@ -85,7 +92,46 @@ func _update_position(new_position: Vector3, new_rotation_degrees: Vector3):
 		rotation_degrees = new_rotation_degrees
 
 func _physics_process(delta: float) -> void:	
-	if multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+	if 1 in GameManager.players and GameManager.players[1]["solo"]:
+		inputs.update(delta)
+		camera_bob(delta)
+		#Manage lantern
+		if Input.is_action_just_pressed("light"):
+			toggle_lantern()
+		set_lantern(delta)
+		#Escape Menu:
+		UI.visible = in_menu
+		toggle_mouse()
+		if Input.is_action_just_pressed("menu"):
+			in_menu = !in_menu
+		
+		if should_sync():
+			data = {"position": position, 
+				"rotation": rotation, 
+				"lantern_lit": lantern_lit,
+				"in_menu": in_menu
+				}
+			GameManager.players[int(name)]["data"] = data
+		#backup last known positions
+			if delay >= 0.5:
+				delay = 0.0
+				backup_position(3)
+		if delay <= 0.5:
+			delay += delta
+		
+		if out_of_bounds():
+			position = position_backup()
+			
+		if !in_menu:
+			#handle sprint / player speed
+			speed = (14 if Input.is_action_pressed("sprint") and is_on_floor() else 7)
+			
+			#handle movement
+			velocity = inputs.motion * speed
+			
+			move_and_slide()
+			
+	elif multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
 		if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
 			# The client which this player represent will update the controls state, and notify it to everyone.
 			inputs.update(delta)

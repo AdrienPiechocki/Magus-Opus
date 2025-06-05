@@ -17,6 +17,7 @@ func _ready():
 
 func _on_solo_pressed() -> void:
 	var player_name = $Choice/Name.text 
+	GameManager.peer.close()
 	GameManager.players = {1: {"name": player_name, 
 								"solo": true,
 								"dedicated_server": false,
@@ -28,7 +29,7 @@ func _on_solo_pressed() -> void:
 										"in_menu": false
 									}
 							}}
-	GameManager.load_world()
+	GameManager.begin_solo()
 
 func _on_lan_pressed() -> void:
 	$Choice.hide()
@@ -127,6 +128,8 @@ func _on_game_error(errtxt):
 	$Connect/Join.disabled = false
 
 func _process(_delta: float) -> void:
+	if 1 in GameManager.players.keys() and GameManager.players[1]["solo"]:
+		return
 	if GameManager.server_started:
 		$Players/Start.disabled = (not multiplayer.is_server() if multiplayer.get_peers().is_empty() else not (verify_ready() and multiplayer.is_server()))
 		$Players/Ready.disabled = (multiplayer.is_server() if multiplayer.get_peers().is_empty() else false)

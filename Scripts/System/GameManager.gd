@@ -206,17 +206,14 @@ func load_world():
 func begin_game():
 	assert(multiplayer.is_server())
 	load_world.rpc()
-	if join_in_game:
-		join_game.rpc_id(1)
-	else:
-		var _world = get_tree().get_root().get_node("World")
-		
-		var spawns := []
-		for p: int in players:
-			spawns.append(p)
+	var _world = get_tree().get_root().get_node("World")
+	
+	var spawns := []
+	for p: int in players:
+		spawns.append(p)
 
-		for p_id: int in spawns:
-			spawn_player(p_id, GameManager.players[p_id]["data"])
+	for p_id: int in spawns:
+		spawn_player(p_id, GameManager.players[p_id]["data"])
 
 @rpc("any_peer")
 func join_game():
@@ -228,6 +225,12 @@ func join_game():
 	players[multiplayer.get_unique_id()]["in_game"] = true
 	spawn_player.rpc(id, GameManager.players[id]["data"])
 
+func begin_solo():
+	load_world()
+	var _world = get_tree().get_root().get_node("World")
+	_world.get_node("MultiplayerSpawner").free()
+	spawn_player(1, GameManager.players[1]["data"])
+
 @rpc("any_peer", "call_local")
 func spawn_player(id: int, data: Dictionary):
 	players[id]["in_game"] = true
@@ -235,7 +238,6 @@ func spawn_player(id: int, data: Dictionary):
 	var player = player_scene.instantiate()
 	for key in data:
 			player.set(str(key), data[key])
-	player.set_multiplayer_authority(id)
 	player.name = str(id)
 	_world.get_node("Players").add_child(player, true)
 	print("spawned player with id:", id)	
