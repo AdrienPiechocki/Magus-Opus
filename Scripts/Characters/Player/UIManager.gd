@@ -10,8 +10,10 @@ func _ready() -> void:
 
 func _on_exit_pressed() -> void:
 	if 1 in GameManager.players and GameManager.players[1]["solo"]:
+		GameManager.players[1]["in_game"] = false
 		GameManager.end_game()
 	else:
+		GameManager.players[multiplayer.get_unique_id()]["in_game"] = false
 		multiplayer.multiplayer_peer.close()
 	
 func _on_back_pressed() -> void:

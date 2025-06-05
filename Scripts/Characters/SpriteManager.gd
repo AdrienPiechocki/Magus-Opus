@@ -1,5 +1,6 @@
 extends MeshInstance3D
 
+@export var npc:bool
 var mat:StandardMaterial3D
 var angle:float
 var pos:Vector3
@@ -36,10 +37,14 @@ func _process(_delta: float) -> void:
 		set_orientation(angle)
 		change_solo()
 		
-	elif multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+	elif !npc and int(get_parent().name) in GameManager.players and GameManager.players[int(get_parent().name)]["in_game"]:
 		update.rpc_id(int(get_parent().name))
 		change()
-
+	elif npc:
+		angle = round_to_dec(get_parent().rotation_degrees.y, 1)
+		set_orientation(angle)
+		change()
+	
 func change():
 	for player in get_tree().get_nodes_in_group("Player"):
 		if player.name != get_parent().name:
@@ -90,21 +95,21 @@ func change_solo():
 
 
 func set_texture(player, order:Array):
-	if sideToMaterial[currentSide] == North:
+	if sideToMaterial[currentSide] == North and int(player.name) in GameManager.players:
 		change_texture.rpc_id(int(player.name), order[0])
-	elif sideToMaterial[currentSide] == NorthEast:
+	elif sideToMaterial[currentSide] == NorthEast and int(player.name) in GameManager.players:
 		change_texture.rpc_id(int(player.name), order[1])
-	elif sideToMaterial[currentSide] == East:
+	elif sideToMaterial[currentSide] == East and int(player.name) in GameManager.players:
 		change_texture.rpc_id(int(player.name), order[2])
-	elif sideToMaterial[currentSide] == SouthEast:
+	elif sideToMaterial[currentSide] == SouthEast and int(player.name) in GameManager.players:
 		change_texture.rpc_id(int(player.name), order[3])
-	elif sideToMaterial[currentSide] == South:
+	elif sideToMaterial[currentSide] == South and int(player.name) in GameManager.players:
 		change_texture.rpc_id(int(player.name), order[4])
-	elif sideToMaterial[currentSide] == SouthWest:
+	elif sideToMaterial[currentSide] == SouthWest and int(player.name) in GameManager.players:
 		change_texture.rpc_id(int(player.name), order[5])
-	elif sideToMaterial[currentSide] == West:
+	elif sideToMaterial[currentSide] == West and int(player.name) in GameManager.players:
 		change_texture.rpc_id(int(player.name), order[6])
-	elif sideToMaterial[currentSide] == NorthWest:
+	elif sideToMaterial[currentSide] == NorthWest and int(player.name) in GameManager.players:
 		change_texture.rpc_id(int(player.name), order[7])
 
 func set_texture_solo(order:Array):

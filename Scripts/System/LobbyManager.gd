@@ -1,6 +1,5 @@
 extends Control
 
-var is_online:bool = false
 var ready_style:StyleBoxFlat = StyleBoxFlat.new()
 @onready var default_color:Color = $Choice.get_theme_stylebox("panel").bg_color
 
@@ -37,13 +36,6 @@ func _on_lan_pressed() -> void:
 	$Connect/IPAddress.text = "127.0.0.1"
 	$Connect.show()
 
-func _on_online_pressed() -> void:
-	$Choice.hide()
-	$Connect/Name.text = $Choice/Name.text
-	$Connect/IPAddress.text = "tomfol.io"
-	is_online = true
-	$Connect.show()
-
 func _on_host_pressed():
 	if $Connect/Name.text == "":
 		$Connect/ErrorLabel.text = "Invalid name!"
@@ -54,12 +46,8 @@ func _on_host_pressed():
 	$Connect/ErrorLabel.text = ""
 
 	var player_name = $Connect/Name.text
-	if is_online:
-		GameManager.host_game_noray(player_name)
-		$Players/CopyOID.disabled = false
-	else:
-		GameManager.host_game_local(player_name)
-		$Players/CopyOID.disabled = true
+	GameManager.host_game(player_name)
+	$Players/CopyOID.disabled = true
 
 
 func _on_join_pressed():
@@ -73,15 +61,8 @@ func _on_join_pressed():
 
 	var player_name = $Connect/Name.text
 	var ip = $Connect/IPAddress.text
-	if is_online:
-		GameManager.join_game_noray(ip, player_name)
-		$Players/CopyOID.disabled = false
-	else:
-		GameManager.join_game_local(ip, player_name)
-		$Players/CopyOID.disabled = true
-
-func _on_copy_oid_pressed() -> void:
-	DisplayServer.clipboard_set(Noray.oid)
+	GameManager.join_game(ip, player_name)
+	$Players/CopyOID.disabled = true
 
 func _on_back_pressed() -> void:
 	$Choice/Name.text = $Connect/Name.text
@@ -89,7 +70,6 @@ func _on_back_pressed() -> void:
 		$Connect.hide()
 		$Choice.show()
 	elif $Players.visible:
-		is_online = false
 		if GameManager.is_host and not multiplayer.get_peers().is_empty():
 			for peer in multiplayer.get_peers():
 				multiplayer.multiplayer_peer.disconnect_peer(peer)
@@ -97,13 +77,16 @@ func _on_back_pressed() -> void:
 		
 		
 func refresh_lobby():
-	var players = GameManager.get_player_list()
+	var players := []
+	for id in GameManager.players.keys():
+		if id != multiplayer.get_unique_id() and not GameManager.players[id]["dedicated_server"]:
+			players.append(GameManager.players[id]["name"])
 	players.sort()
 	$Players/List.clear()
-	#$Players/List.add_item(GameManager.get_player_name() + " (You)")
+	$Players/List.add_item(GameManager.get_player_name() + " (You)")
 	for p in players:
 		$Players/List.add_item(p)
-
+	
 func _on_connection_success():
 	$Connect.hide()
 	$Players.show()
@@ -161,6 +144,13 @@ func toggle_ready(toggle:bool):
 	else:
 		print(multiplayer.get_remote_sender_id(), " isn't ready...")
 		GameManager.players[multiplayer.get_remote_sender_id()]["ready"] = false
+	
+	for player in GameManager.players.keys():
+		if GameManager.players[player]["in_game"]:
+			if GameManager.players[multiplayer.get_unique_id()]["ready"]:
+				GameManager.load_world()
+				GameManager.join_existing_game.rpc_id(1)
+				return
 
 func _on_start_pressed() -> void:
 	GameManager.begin_game()

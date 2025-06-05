@@ -34,8 +34,10 @@ var recent_calls:Array = []
 func _enter_tree() -> void:
 	if GameManager.players[1]["solo"]:
 		get_node("MultiplayerSynchronizer").free()
+		GameManager.players[1]["in_game"] = true
 	else:
 		set_multiplayer_authority(int(name))
+		GameManager.players[int(name)]["in_game"] = true
 		
 
 func _ready() -> void:
@@ -130,8 +132,9 @@ func _physics_process(delta: float) -> void:
 			velocity = inputs.motion * speed
 			
 			move_and_slide()
-			
-	elif multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+		
+	
+	elif GameManager.peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED and int(name) in GameManager.players and GameManager.players[int(name)]["in_game"]:
 		if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
 			# The client which this player represent will update the controls state, and notify it to everyone.
 			inputs.update(delta)

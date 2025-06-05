@@ -225,7 +225,6 @@ horizontal_alignment = 1
 
 [connection signal="pressed" from="Choice/Solo" to="." method="_on_solo_pressed"]
 [connection signal="pressed" from="Choice/LAN" to="." method="_on_lan_pressed"]
-[connection signal="pressed" from="Choice/Online" to="." method="_on_online_pressed"]
 [connection signal="pressed" from="Choice/Exit" to="." method="_on_exit_pressed"]
 [connection signal="pressed" from="Connect/Host" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="Connect/Join" to="." method="_on_join_pressed"]
