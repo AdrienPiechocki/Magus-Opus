@@ -14,5 +14,5 @@ var generate_sprite = func():
 		await RenderingServer.frame_post_draw
 		var image = get_texture().get_image()
 		result = image
-		result.save_png("user://sprites/sprites"+str(i+1)+".png")
+		result.save_png("user://sprites"+str(i+1)+".png")
 		angle += TAU / 8
