@@ -34,8 +34,8 @@ func _ready():
 	if OS.has_feature("dedicated_server"):
 		host_game_local("server")
 		players[1]["dedicated_server"] = true
-		players[1]["ready"] = true
-		load_world.call_deferred()
+		begin_game.call_deferred()
+		remove_player.call_deferred(1)
 		print("server running")
 	
 	multiplayer.peer_connected.connect(_player_connected)
@@ -47,13 +47,13 @@ func _ready():
 func _process(_delta: float) -> void:
 	non_server_players = players.keys().filter(func(id): return !players[id]["dedicated_server"])
 	if OS.has_feature("dedicated_server") and server_started:
-		if check_ready():
-			for player in players.keys():
-				if not players[player]["in_game"] and not players[player]["dedicated_server"]:
-					print("load world for ", player)
-					players[player]["in_game"] = true
-					join_in_game = true
-					load_world.rpc_id(player)
+		for player in non_server_players:
+			if not players[player]["in_game"] and players[player]["ready"]:
+				print("load world for ", player)
+				players[player]["in_game"] = true
+				join_in_game = true
+				load_world.rpc_id(player)
+				join_game.rpc_id(1)
 					
 	if not players.keys().is_empty():
 		server_started = true
@@ -71,12 +71,6 @@ func _process(_delta: float) -> void:
 		server_started = false
 		join_in_game = false
 		
-
-func check_ready() -> bool:
-	for player in non_server_players:
-		if not players[player]["ready"]:
-			return false
-	return true
 
 func _player_connected(id):
 	print("player connected")
@@ -176,6 +170,7 @@ func join_game_local(ip, new_player_name):
 	for player in players.keys():
 		if players[player]["in_game"]:
 			load_world()
+			join_game.rpc_id(1)
 			return
 
 func timeout():
@@ -207,31 +202,27 @@ func load_world():
 		get_tree().get_root().get_node("World").free()
 	get_tree().get_root().add_child(_world)
 	get_tree().get_root().get_node("Lobby").hide()
+	
+func begin_game():
+	assert(multiplayer.is_server())
+	load_world.rpc()
 	if join_in_game:
 		join_game.rpc_id(1)
 	else:
-		begin_game()
+		var _world = get_tree().get_root().get_node("World")
+		
+		var spawns := []
+		for p: int in players:
+			spawns.append(p)
 
-func begin_game():
-
-	var _world = get_tree().get_root().get_node("World")
-	
-	var spawns := []
-	for p: int in players:
-		spawns.append(p)
-
-	for p_id: int in spawns:
-		var player = player_scene.instantiate()
-		player.name = str(p_id)
-		for key in players[p_id]["data"]:
-			player.set(str(key), players[p_id]["data"][key])
-		_world.get_node("Players").add_child(player, true)
-		print("spawned player with id: ", player.name)
+		for p_id: int in spawns:
+			spawn_player(p_id, GameManager.players[p_id]["data"])
 
 @rpc("any_peer")
 func join_game():
 	var id = multiplayer.get_remote_sender_id()
 	for pid in non_server_players:
+		print(pid, "  ", players[pid]["in_game"])
 		if pid != id and players[pid]["in_game"]:
 			spawn_player.rpc_id(id, pid, GameManager.players[pid]["data"])
 	players[multiplayer.get_unique_id()]["in_game"] = true
@@ -239,6 +230,7 @@ func join_game():
 
 @rpc("any_peer", "call_local")
 func spawn_player(id: int, data: Dictionary):
+	players[id]["in_game"] = true
 	var _world = get_tree().get_root().get_node("World")
 	var player = player_scene.instantiate()
 	for key in data:

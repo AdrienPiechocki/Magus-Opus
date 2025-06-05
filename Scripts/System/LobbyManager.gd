@@ -160,4 +160,4 @@ func toggle_ready(toggle:bool):
 		GameManager.players[multiplayer.get_remote_sender_id()]["ready"] = false
 
 func _on_start_pressed() -> void:
-	GameManager.load_world.rpc()
+	GameManager.begin_game()

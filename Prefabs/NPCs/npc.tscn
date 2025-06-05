@@ -1,21 +1,27 @@
 [gd_scene load_steps=14 format=3 uid="uid://cwng1l8d3835m"]
 
 [ext_resource type="Script" uid="uid://domlqkgbhyeck" path="res://Scripts/Characters/NPCs/npc.gd" id="1_nrg37"]
-[ext_resource type="Material" uid="uid://y6h0c4va1mio" path="res://Graphics/materials/Guard.tres" id="2_yxwh2"]
 [ext_resource type="Script" uid="uid://yw180iquco87" path="res://Scripts/Characters/SpriteManager.gd" id="3_tgh55"]
-[ext_resource type="Texture2D" uid="uid://bdw3ul5g2f4ke" path="res://Graphics/textures/Guard/GuardNorth.png" id="4_phvsa"]
-[ext_resource type="Texture2D" uid="uid://cxvd0gyeynn55" path="res://Graphics/textures/Guard/GuardNE.png" id="4_yxwh2"]
-[ext_resource type="Texture2D" uid="uid://b8etw876tpi8s" path="res://Graphics/textures/Guard/GuardEast.png" id="5_k0a86"]
-[ext_resource type="Texture2D" uid="uid://dxinsug0pk000" path="res://Graphics/textures/Guard/GuardSE.png" id="6_waala"]
-[ext_resource type="Texture2D" uid="uid://c0s0xl2xv0yqn" path="res://Graphics/textures/Guard/GuardSouth.png" id="7_elyfo"]
-[ext_resource type="Texture2D" uid="uid://njgnvya7tcq0" path="res://Graphics/textures/Guard/GuardSW.png" id="8_ivyr1"]
-[ext_resource type="Texture2D" uid="uid://bdam4uoo3aocs" path="res://Graphics/textures/Guard/GuardWest.png" id="9_kbcrf"]
-[ext_resource type="Texture2D" uid="uid://dm5rgqysousaa" path="res://Graphics/textures/Guard/GuardNW.png" id="10_ps1u0"]
+[ext_resource type="Texture2D" uid="uid://bdw3ul5g2f4ke" path="res://Graphics/textures/Guard/GuardNorth.png" id="4_yxwh2"]
+[ext_resource type="Texture2D" uid="uid://cxvd0gyeynn55" path="res://Graphics/textures/Guard/GuardNE.png" id="5_k0a86"]
+[ext_resource type="Texture2D" uid="uid://b8etw876tpi8s" path="res://Graphics/textures/Guard/GuardEast.png" id="6_waala"]
+[ext_resource type="Texture2D" uid="uid://dxinsug0pk000" path="res://Graphics/textures/Guard/GuardSE.png" id="7_elyfo"]
+[ext_resource type="Texture2D" uid="uid://c0s0xl2xv0yqn" path="res://Graphics/textures/Guard/GuardSouth.png" id="8_ivyr1"]
+[ext_resource type="Texture2D" uid="uid://njgnvya7tcq0" path="res://Graphics/textures/Guard/GuardSW.png" id="9_kbcrf"]
+[ext_resource type="Texture2D" uid="uid://bdam4uoo3aocs" path="res://Graphics/textures/Guard/GuardWest.png" id="10_ps1u0"]
+[ext_resource type="Texture2D" uid="uid://dm5rgqysousaa" path="res://Graphics/textures/Guard/GuardNW.png" id="11_y4hog"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_nrg37"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tgh55"]
+resource_local_to_scene = true
+transparency = 1
+diffuse_mode = 1
+albedo_texture = ExtResource("4_yxwh2")
+billboard_mode = 2
+
 [sub_resource type="QuadMesh" id="QuadMesh_whts2"]
-material = ExtResource("2_yxwh2")
+material = SubResource("StandardMaterial3D_tgh55")
 size = Vector2(1, 2)
 
 [node name="NPC" type="CharacterBody3D"]
@@ -28,15 +34,11 @@ shape = SubResource("CapsuleShape3D_nrg37")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("QuadMesh_whts2")
 script = ExtResource("3_tgh55")
-npc = true
-North = ExtResource("4_phvsa")
-NorthEast = ExtResource("4_yxwh2")
-East = ExtResource("5_k0a86")
-SouthEast = ExtResource("6_waala")
-South = ExtResource("7_elyfo")
-SouthWest = ExtResource("8_ivyr1")
-West = ExtResource("9_kbcrf")
-NorthWest = ExtResource("10_ps1u0")
-
-[node name="Head" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+North = ExtResource("4_yxwh2")
+NorthEast = ExtResource("5_k0a86")
+East = ExtResource("6_waala")
+SouthEast = ExtResource("7_elyfo")
+South = ExtResource("8_ivyr1")
+SouthWest = ExtResource("9_kbcrf")
+West = ExtResource("10_ps1u0")
+NorthWest = ExtResource("11_y4hog")

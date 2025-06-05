@@ -1,7 +1,6 @@
 extends CharacterBody3D
 
 var speed:float
-@export var synced_position:Vector3
 var lantern_lit:bool
 var in_menu:bool
 
@@ -44,7 +43,6 @@ func _ready() -> void:
 	if is_multiplayer_authority():
 		for _data in GameManager.players[int(name)]["data"]:
 			set(str(_data), GameManager.players[int(name)]["data"][_data])
-	synced_position = position
 	spawn = position
 	
 func _process(_delta: float) -> void:
@@ -80,6 +78,12 @@ func set_visibility():
 	sprite.show()
 	hands.hide()
 
+@rpc("any_peer", "unreliable_ordered")
+func _update_position(new_position: Vector3, new_rotation_degrees: Vector3):
+	if not is_multiplayer_authority():
+		position = new_position
+		rotation_degrees = new_rotation_degrees
+
 func _physics_process(delta: float) -> void:	
 	if multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
 		if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
@@ -113,10 +117,8 @@ func _physics_process(delta: float) -> void:
 			delay += delta
 			
 		if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
-			synced_position = position
-		else:
-			position = synced_position
-		
+			_update_position.rpc(position, rotation_degrees)
+			
 		if out_of_bounds():
 			position = position_backup()
 			

@@ -1,7 +1,6 @@
 extends MeshInstance3D
 
-@export var npc:bool
-var mat:StandardMaterial3D = StandardMaterial3D.new()
+var mat:StandardMaterial3D
 var angle:float
 var pos:Vector3
 
@@ -32,33 +31,30 @@ func _ready() -> void:
 	mat = mesh.surface_get_material(0).duplicate()
 	
 func _process(_delta: float) -> void:
-	update.rpc_id(int(get_parent().name))
-	change()
-
-func change():
-	for player in get_tree().get_nodes_in_group("Player"):
-		if player.name != get_parent().name:
-			pos = player.position.direction_to(global_position)
-			if abs(pos.x) < 0.5:
-				if pos.z > 0:
-					set_texture(player, [West, SouthWest, South, SouthEast, East, NorthEast, North, NorthWest])
-				elif pos.z < 0:
-					set_texture(player, [East, NorthEast, North, NorthWest, West, SouthWest, South, SouthEast])
-			elif pos.x > 0:
-				if abs(pos.z) < 0.5:
-					set_texture(player, [South, SouthEast, East, NorthEast, North, NorthWest, West, SouthWest])
-				elif pos.z > 0:
-					set_texture(player, [SouthWest, South, SouthEast, East, NorthEast, North, NorthWest, West])
-				elif pos.z < 0:
-					set_texture(player, [SouthEast, East, NorthEast, North, NorthWest, West, SouthWest, South])
-			elif pos.x < 0:
-				if abs(pos.z) < 0.5:
-					set_texture(player, [North, NorthWest, West, SouthWest, South, SouthEast, East, NorthEast])
-				elif pos.z > 0:
-					set_texture(player, [NorthWest, West, SouthWest, South, SouthEast, East, NorthEast, North])
-				elif pos.z < 0:
-					set_texture(player, [NorthEast, North, NorthWest, West, SouthWest, South, SouthEast, East])
-
+	if multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+		update.rpc_id(int(get_parent().name))
+		for player in get_tree().get_nodes_in_group("Player"):
+			if player.name != get_parent().name:
+				pos = player.position.direction_to(global_position)
+				if abs(pos.x) < 0.5:
+					if pos.z > 0:
+						set_texture(player, [West, SouthWest, South, SouthEast, East, NorthEast, North, NorthWest])
+					elif pos.z < 0:
+						set_texture(player, [East, NorthEast, North, NorthWest, West, SouthWest, South, SouthEast])
+				elif pos.x > 0:
+					if abs(pos.z) < 0.5:
+						set_texture(player, [South, SouthEast, East, NorthEast, North, NorthWest, West, SouthWest])
+					elif pos.z > 0:
+						set_texture(player, [SouthWest, South, SouthEast, East, NorthEast, North, NorthWest, West])
+					elif pos.z < 0:
+						set_texture(player, [SouthEast, East, NorthEast, North, NorthWest, West, SouthWest, South])
+				elif pos.x < 0:
+					if abs(pos.z) < 0.5:
+						set_texture(player, [North, NorthWest, West, SouthWest, South, SouthEast, East, NorthEast])
+					elif pos.z > 0:
+						set_texture(player, [NorthWest, West, SouthWest, South, SouthEast, East, NorthEast, North])
+					elif pos.z < 0:
+						set_texture(player, [NorthEast, North, NorthWest, West, SouthWest, South, SouthEast, East])
 
 func set_texture(player, order:Array):
 	if sideToMaterial[currentSide] == North:
