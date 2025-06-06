@@ -51,6 +51,7 @@ func _process(_delta: float) -> void:
 				print("load world for ", player)
 				load_world.rpc_id(player)
 				player_joined_in_game.emit()
+				players[player]["in_game"] = true
 				join_existing_game.rpc_id(1)
 				
 	server_started = !players.keys().is_empty()
@@ -157,8 +158,6 @@ func get_player_name():
 @rpc("any_peer", "call_local")
 func load_world():
 	var _world = world.instantiate()
-	if get_tree().get_root().has_node("World"):
-		get_tree().get_root().get_node("World").free()
 	get_tree().get_root().add_child(_world)
 	get_tree().get_root().get_node("Lobby").hide()
 	
@@ -172,8 +171,7 @@ func begin_game():
 		spawns.append(p)
 
 	for p_id: int in spawns:
-		if not players[p_id]["dedicated_server"]:
-			spawn_player(p_id, GameManager.players[p_id]["data"])
+		spawn_player(p_id, GameManager.players[p_id]["data"])
 
 @rpc("any_peer", "call_local")
 func join_existing_game():
@@ -197,6 +195,8 @@ func begin_solo():
 
 @rpc("authority", "call_local")
 func spawn_player(id: int, data: Dictionary):
+	if players[id]["dedicated_server"]:
+		return
 	var players_root = get_tree().get_root().get_node("World/Players")
 	var existing = players_root.get_node_or_null(str(id))
 	if existing:
