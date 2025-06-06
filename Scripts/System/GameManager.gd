@@ -155,8 +155,6 @@ func join_game(ip, new_player_name, password):
 	
 
 func timeout():
-	if multiplayer.multiplayer_peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
-		return
 	if multiplayer.get_unique_id() not in players.keys():
 		multiplayer.multiplayer_peer.close()
 
