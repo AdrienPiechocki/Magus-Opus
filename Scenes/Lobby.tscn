@@ -33,22 +33,13 @@ offset_right = 147.0
 offset_bottom = 105.0
 text = " Solo "
 
-[node name="LAN" type="Button" parent="Choice"]
+[node name="Multiplayer" type="Button" parent="Choice"]
 layout_mode = 0
-offset_left = 97.0
-offset_top = 113.0
-offset_right = 146.0
-offset_bottom = 144.0
-text = " LAN "
-
-[node name="Online" type="Button" parent="Choice"]
-layout_mode = 0
-offset_left = 92.0
-offset_top = 152.0
-offset_right = 152.0
-offset_bottom = 183.0
-disabled = true
-text = "Online"
+offset_left = 71.0
+offset_top = 120.0
+offset_right = 176.0
+offset_bottom = 151.0
+text = " Multiplayer "
 
 [node name="NameLabel" type="Label" parent="Choice"]
 layout_mode = 0
@@ -230,7 +221,7 @@ text = "Version : ALPHA 0.1.4"
 horizontal_alignment = 1
 
 [connection signal="pressed" from="Choice/Solo" to="." method="_on_solo_pressed"]
-[connection signal="pressed" from="Choice/LAN" to="." method="_on_lan_pressed"]
+[connection signal="pressed" from="Choice/Multiplayer" to="." method="_on_multiplayer_pressed"]
 [connection signal="pressed" from="Choice/Exit" to="." method="_on_exit_pressed"]
 [connection signal="pressed" from="Connect/Host" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="Connect/Join" to="." method="_on_join_pressed"]

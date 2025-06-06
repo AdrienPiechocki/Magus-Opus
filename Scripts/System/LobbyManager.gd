@@ -31,7 +31,7 @@ func _on_solo_pressed() -> void:
 							}}
 	GameManager.begin_solo()
 
-func _on_lan_pressed() -> void:
+func _on_multiplayer_pressed() -> void:
 	$Choice.hide()
 	$Connect/Name.text = $Choice/Name.text
 	$Connect/IPAddress.text = "127.0.0.1"
