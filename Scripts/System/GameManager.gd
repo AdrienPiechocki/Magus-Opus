@@ -157,6 +157,8 @@ func get_player_name():
 
 @rpc("any_peer", "call_local")
 func load_world():
+	if get_tree().get_root().has_node("World"):
+		return
 	var _world = world.instantiate()
 	get_tree().get_root().add_child(_world)
 	get_tree().get_root().get_node("Lobby").hide()
@@ -214,6 +216,7 @@ func spawn_player(id: int, data: Dictionary):
 	for key in data:
 		player.set(str(key), data[key])
 	players[id]["in_game"] = true
+	players[id]["ready"] = true
 	print("spawned player with id:", id)	
 
 	

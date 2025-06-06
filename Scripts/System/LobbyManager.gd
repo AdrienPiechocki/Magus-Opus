@@ -2,6 +2,7 @@ extends Control
 
 var ready_style:StyleBoxFlat = StyleBoxFlat.new()
 @onready var default_color:Color = $Choice.get_theme_stylebox("panel").bg_color
+@onready var default_font:Color = $Choice/Solo.get_theme_color("font_color")
 
 func _ready():
 	# Called every time the node is added to the scene.
@@ -77,16 +78,29 @@ func _on_back_pressed() -> void:
 		
 		
 func refresh_lobby():
-	var players := []
+	var players:Array = []
 	for id in GameManager.players.keys():
 		if id != multiplayer.get_unique_id() and not GameManager.players[id]["dedicated_server"]:
 			players.append(GameManager.players[id]["name"])
 	players.sort()
+	
+	var ids = []
+	for id in GameManager.players.keys():
+		if id != multiplayer.get_unique_id() and not GameManager.players[id]["dedicated_server"]:
+			ids.append(id)
+	
 	$Players/List.clear()
 	$Players/List.add_item(GameManager.get_player_name() + " (You)")
+	$Players/List.set_item_custom_bg_color(0, Color.CYAN)
+	$Players/List.set_item_selectable(0, false)
 	for p in players:
 		$Players/List.add_item(p)
-	
+		for id in ids:
+			if GameManager.players[id]["name"] == p:
+				var item = ids.bsearch(id)+1
+				$Players/List.set_item_selectable(item, false)
+				$Players/List.set_item_custom_bg_color(item, (Color.LIME_GREEN if GameManager.players[id]["ready"] else Color.LIGHT_YELLOW))
+
 func _on_connection_success():
 	$Connect.hide()
 	$Players.show()
@@ -144,6 +158,16 @@ func toggle_ready(toggle:bool):
 	else:
 		print(multiplayer.get_remote_sender_id(), " isn't ready...")
 		GameManager.players[multiplayer.get_remote_sender_id()]["ready"] = false
+	
+	var ids:Array = []
+	for id in GameManager.players.keys():
+		if id != multiplayer.get_unique_id() and not GameManager.players[id]["dedicated_server"]:
+			ids.append(id)
+	
+	for id in ids:
+		if id == multiplayer.get_remote_sender_id():
+			var item = ids.bsearch(id)+1
+			$Players/List.set_item_custom_bg_color(item, (Color.LIME_GREEN if toggle else Color.LIGHT_YELLOW))
 	
 	for player in GameManager.players.keys():
 		if GameManager.players[player]["in_game"]:
