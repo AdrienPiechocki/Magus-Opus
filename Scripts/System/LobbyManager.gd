@@ -2,7 +2,6 @@ extends Control
 
 var ready_style:StyleBoxFlat = StyleBoxFlat.new()
 @onready var default_color:Color = $Choice.get_theme_stylebox("panel").bg_color
-@onready var default_font:Color = $Choice/Solo.get_theme_color("font_color")
 
 func _ready():
 	# Called every time the node is added to the scene.
@@ -44,10 +43,10 @@ func _on_host_pressed():
 
 	$Connect.hide()
 	$Players.show()
-	$Connect/ErrorLabel.text = ""
 
 	var player_name = $Connect/Name.text
-	GameManager.host_game(player_name)
+	var password = $Connect/Password.text
+	GameManager.host_game(player_name, password)
 	$Players/CopyOID.disabled = true
 
 
@@ -56,13 +55,13 @@ func _on_join_pressed():
 		$Connect/ErrorLabel.text = "Invalid name!"
 		return
 	
-	$Connect/ErrorLabel.text = ""
 	$Connect/Host.disabled = true
 	$Connect/Join.disabled = true
 
 	var player_name = $Connect/Name.text
 	var ip = $Connect/IPAddress.text
-	GameManager.join_game(ip, player_name)
+	var password = $Connect/Password.text
+	GameManager.join_game(ip, player_name, password)
 	$Players/CopyOID.disabled = true
 
 func _on_back_pressed() -> void:
@@ -108,7 +107,8 @@ func _on_connection_success():
 func _on_connection_failed():
 	$Connect/Host.disabled = false
 	$Connect/Join.disabled = false
-	$Connect/ErrorLabel.set_text("Connection failed.")
+	_on_game_error("Can't join server")
+
 
 func _on_game_ended():
 	show()
@@ -179,3 +179,6 @@ func toggle_ready(toggle:bool):
 
 func _on_start_pressed() -> void:
 	GameManager.begin_game()
+
+func _on_hide_toggled(toggled_on: bool) -> void:
+	$Connect/Password.secret = toggled_on

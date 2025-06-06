@@ -32,7 +32,15 @@ signal player_joined_in_game()
 
 func _ready():
 	if OS.has_feature("dedicated_server"):
-		host_game("server")
+		var arguments = {}
+		var password = ""
+		for argument in OS.get_cmdline_args():
+			if argument.find("=") > -1:
+				var key_value = argument.split("=")
+				arguments[key_value[0].lstrip("--")] = key_value[1]
+		if "password" in arguments.keys():
+			password = arguments["password"]
+		host_game("server", password)
 		players[1]["dedicated_server"] = true
 		begin_game.call_deferred()
 		print("server running")
@@ -96,6 +104,7 @@ func register_player(new_player_name):
 					"dedicated_server": false,
 					"ready": false, 
 					"in_game": false, 
+					"password": "",
 					"data": {"position": Vector3(0, 1, 0),
 							"rotation": Vector3(0, 0, 0),
 							"lantern_lit": false,
@@ -116,7 +125,7 @@ func remove_player(id):
 			player.queue_free()
 			print("player ", player.name, " removed")
 
-func host_game(new_player_name):
+func host_game(new_player_name, password):
 	player_name = new_player_name
 	var err = peer.create_server(DEFAULT_PORT, MAX_PEERS)
 	if err != OK:
@@ -127,20 +136,27 @@ func host_game(new_player_name):
 	is_host = true
 	_player_connected(1)
 	print(player_name, " hosting game")
+	await players_list_changed
+	players[1]["password"] = password
 
-func join_game(ip, new_player_name):
+func join_game(ip, new_player_name, password):
 	var timer = get_tree().create_timer(5.0)
 	timer.timeout.connect(timeout)
 	player_name = new_player_name
-	var err = peer.create_client(ip, DEFAULT_PORT)
-	if err:
-		game_error.emit("Can't join server")
-		end_game()
-		return err
+	peer.create_client(ip, DEFAULT_PORT)
 	multiplayer.multiplayer_peer = peer
 	print(player_name, " joined game")
+	await players_list_changed
+	await get_tree().process_frame
+	if players[1]["password"] != "":
+		if password != players[1]["password"]:
+			multiplayer.multiplayer_peer.close()
+			game_error.emit("WRONG PASSWORD")
+	
 
 func timeout():
+	if multiplayer.multiplayer_peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+		return
 	if multiplayer.get_unique_id() not in players.keys():
 		multiplayer.multiplayer_peer.close()
 

@@ -75,7 +75,7 @@ anchor_bottom = 0.5
 offset_left = -125.0
 offset_top = -89.0
 offset_right = 125.0
-offset_bottom = 89.0
+offset_bottom = 142.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -97,17 +97,31 @@ offset_bottom = 60.0
 [node name="IPLabel" type="Label" parent="Connect"]
 layout_mode = 0
 offset_left = 15.0
-offset_top = 69.0
+offset_top = 65.0
 offset_right = 70.0
-offset_bottom = 92.0
+offset_bottom = 88.0
 text = "IP :"
 
 [node name="IPAddress" type="LineEdit" parent="Connect"]
 layout_mode = 0
 offset_left = 9.0
-offset_top = 95.0
+offset_top = 91.0
 offset_right = 174.0
-offset_bottom = 126.0
+offset_bottom = 122.0
+
+[node name="PasswordLabel" type="Label" parent="Connect"]
+offset_left = 14.0
+offset_top = 124.0
+offset_right = 98.0
+offset_bottom = 147.0
+text = "Password :"
+
+[node name="Password" type="LineEdit" parent="Connect"]
+offset_left = 10.0
+offset_top = 149.0
+offset_right = 175.0
+offset_bottom = 180.0
+secret = true
 
 [node name="Host" type="Button" parent="Connect"]
 layout_mode = 0
@@ -120,24 +134,34 @@ text = "Host"
 [node name="Join" type="Button" parent="Connect"]
 layout_mode = 0
 offset_left = 190.0
-offset_top = 94.0
+offset_top = 90.0
 offset_right = 244.105
-offset_bottom = 125.0
+offset_bottom = 121.0
 text = "Join"
 
-[node name="ErrorLabel" type="Label" parent="Connect"]
+[node name="HideLabel" type="Label" parent="Connect"]
 layout_mode = 0
-offset_left = 76.0
+offset_left = 190.0
 offset_top = 140.0
-offset_right = 425.0
-offset_bottom = 196.0
+offset_right = 244.0
+offset_bottom = 163.0
+text = "hidden"
+horizontal_alignment = 1
+
+[node name="Hide" type="CheckButton" parent="Connect"]
+layout_mode = 0
+offset_left = 195.0
+offset_top = 159.0
+offset_right = 239.0
+offset_bottom = 183.0
+button_pressed = true
 
 [node name="Back" type="Button" parent="Connect"]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 139.0
-offset_right = 62.0
-offset_bottom = 170.0
+offset_left = 92.0
+offset_top = 190.0
+offset_right = 146.0
+offset_bottom = 221.0
 text = " Back "
 
 [node name="Players" type="Panel" parent="."]
@@ -225,6 +249,7 @@ horizontal_alignment = 1
 [connection signal="pressed" from="Choice/Exit" to="." method="_on_exit_pressed"]
 [connection signal="pressed" from="Connect/Host" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="Connect/Join" to="." method="_on_join_pressed"]
+[connection signal="toggled" from="Connect/Hide" to="." method="_on_hide_toggled"]
 [connection signal="pressed" from="Connect/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="Players/CopyOID" to="." method="_on_copy_oid_pressed"]
 [connection signal="pressed" from="Players/Start" to="." method="_on_start_pressed"]
