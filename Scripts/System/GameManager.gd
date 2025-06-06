@@ -28,13 +28,13 @@ signal connection_succeeded()
 signal game_ended()
 signal game_error(what)
 signal players_list_changed()
+signal player_joined_in_game()
 
 func _ready():
 	if OS.has_feature("dedicated_server"):
 		host_game("server")
 		players[1]["dedicated_server"] = true
 		begin_game.call_deferred()
-		remove_player.call_deferred(1)
 		print("server running")
 	
 	multiplayer.peer_connected.connect(_player_connected)
@@ -50,6 +50,7 @@ func _process(_delta: float) -> void:
 			if not players[player]["in_game"] and players[player]["ready"]:
 				print("load world for ", player)
 				load_world.rpc_id(player)
+				player_joined_in_game.emit()
 				join_existing_game.rpc_id(1)
 				
 	server_started = !players.keys().is_empty()
@@ -139,7 +140,7 @@ func join_game(ip, new_player_name):
 	print(player_name, " joined game")
 
 func timeout():
-	if peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED and multiplayer.get_unique_id() not in players.keys():
+	if multiplayer.get_unique_id() not in players.keys():
 		multiplayer.multiplayer_peer.close()
 
 
@@ -171,16 +172,22 @@ func begin_game():
 		spawns.append(p)
 
 	for p_id: int in spawns:
-		spawn_player(p_id, GameManager.players[p_id]["data"])
+		if not players[p_id]["dedicated_server"]:
+			spawn_player(p_id, GameManager.players[p_id]["data"])
 
-@rpc("any_peer")
+@rpc("any_peer", "call_local")
 func join_existing_game():
 	var id = multiplayer.get_remote_sender_id()
+	# send existing players to new client
 	for pid in non_server_players:
-		print(pid, "  ", players[pid]["in_game"])
 		if pid != id and players[pid]["in_game"]:
 			spawn_player.rpc_id(id, pid, GameManager.players[pid]["data"])
-	spawn_player.rpc(id, GameManager.players[id]["data"])
+	# send new player to existing clients
+	for pid in non_server_players:
+		if pid != id and players[pid]["in_game"]:
+			spawn_player.rpc_id(pid, id, GameManager.players[id]["data"])
+	# spawn new player locally
+	spawn_player.rpc_id(id, id, GameManager.players[id]["data"])
 
 func begin_solo():
 	load_world()
@@ -188,14 +195,25 @@ func begin_solo():
 	_world.get_node("MultiplayerSpawner").free()
 	spawn_player(1, GameManager.players[1]["data"])
 
-@rpc("any_peer", "call_local")
+@rpc("authority", "call_local")
 func spawn_player(id: int, data: Dictionary):
-	var _world = get_tree().get_root().get_node("World")
+	var players_root = get_tree().get_root().get_node("World/Players")
+	var existing = players_root.get_node_or_null(str(id))
+	if existing:
+		if is_instance_valid(existing):
+			print("Player with ID ", id, " already spawned. Ignoring.")
+			return
+		else:
+			print("Removing invalid reference for player", id)
+			existing.queue_free()
+			await get_tree().process_frame
+	
 	var player = player_scene.instantiate()
-	for key in data:
-			player.set(str(key), data[key])
 	player.name = str(id)
-	_world.get_node("Players").add_child(player, true)
+	players_root.add_child(player, true)
+	for key in data:
+		player.set(str(key), data[key])
+	players[id]["in_game"] = true
 	print("spawned player with id:", id)	
 
 	

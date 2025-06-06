@@ -149,6 +149,7 @@ func toggle_ready(toggle:bool):
 		if GameManager.players[player]["in_game"]:
 			if GameManager.players[multiplayer.get_unique_id()]["ready"]:
 				GameManager.load_world()
+				GameManager.player_joined_in_game.emit()
 				GameManager.join_existing_game.rpc_id(1)
 				return
 

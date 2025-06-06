@@ -34,13 +34,11 @@ var recent_calls:Array = []
 func _enter_tree() -> void:
 	if GameManager.players[1]["solo"]:
 		get_node("MultiplayerSynchronizer").free()
-		GameManager.players[1]["in_game"] = true
 	else:
 		set_multiplayer_authority(int(name))
-		GameManager.players[int(name)]["in_game"] = true
 		
-
 func _ready() -> void:
+	GameManager.player_joined_in_game.connect(sync)
 	if GameManager.players[1]["solo"]:
 		camera.current = true
 	else:
@@ -49,10 +47,8 @@ func _ready() -> void:
 	hands.show()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	last_known_pos.append(position)
-	if GameManager.players[1]["solo"] or is_multiplayer_authority():
-		for _data in GameManager.players[int(name)]["data"]:
-			set(str(_data), GameManager.players[int(name)]["data"][_data])
 	spawn = position
+	#GameManager.players[int(name)]["in_game"] = true
 	
 func _process(_delta: float) -> void:
 	#Set player nametag and other players visibility:
@@ -80,7 +76,8 @@ func set_lantern(delta:float):
 
 @rpc("any_peer", "call_local")
 func set_player_name():
-	label.text = str(GameManager.players[int(name)]["name"])
+	if int(name) in GameManager.players:
+		label.text = str(GameManager.players[int(name)]["name"])
 
 @rpc("any_peer", "call_local")
 func set_visibility():
@@ -88,10 +85,11 @@ func set_visibility():
 	hands.hide()
 
 @rpc("any_peer", "unreliable_ordered")
-func _update_position(new_position: Vector3, new_rotation_degrees: Vector3):
+func _update(new_position: Vector3, new_rotation_degrees: Vector3, new_in_menu:bool):
 	if not is_multiplayer_authority():
 		position = new_position
 		rotation_degrees = new_rotation_degrees
+		in_menu = new_in_menu
 
 func _physics_process(delta: float) -> void:	
 	if 1 in GameManager.players and GameManager.players[1]["solo"]:
@@ -108,16 +106,7 @@ func _physics_process(delta: float) -> void:
 			in_menu = !in_menu
 		
 		if should_sync():
-			data = {"position": position, 
-				"rotation": rotation, 
-				"lantern_lit": lantern_lit,
-				"in_menu": in_menu
-				}
-			GameManager.players[int(name)]["data"] = data
-		#backup last known positions
-			if delay >= 0.5:
-				delay = 0.0
-				backup_position(3)
+			sync()
 		if delay <= 0.5:
 			delay += delta
 		
@@ -134,9 +123,8 @@ func _physics_process(delta: float) -> void:
 			move_and_slide()
 		
 	
-	elif GameManager.peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED and int(name) in GameManager.players and GameManager.players[int(name)]["in_game"]:
+	elif multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED and int(name) in GameManager.players and GameManager.players[int(name)]["in_game"]:
 		if multiplayer.multiplayer_peer == null or str(multiplayer.get_unique_id()) == str(name):
-			# The client which this player represent will update the controls state, and notify it to everyone.
 			inputs.update(delta)
 			camera_bob(delta)
 			#Manage lantern
@@ -150,24 +138,15 @@ func _physics_process(delta: float) -> void:
 			if Input.is_action_just_pressed("menu"):
 				in_menu = !in_menu
 		
+		if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
+			_update.rpc(position, rotation_degrees, in_menu)
+			
 		#data synchronization:
 		if should_sync():
-			data = {"position": position, 
-				"rotation": rotation, 
-				"lantern_lit": lantern_lit,
-				"in_menu": in_menu
-				}
-			GameManager.players[int(name)]["data"] = data
-		#backup last known positions
-			if delay >= 0.5:
-				delay = 0.0
-				backup_position(3)
+			sync.rpc()
 		if delay <= 0.5:
 			delay += delta
-			
-		if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
-			_update_position.rpc(position, rotation_degrees)
-			
+
 		if out_of_bounds():
 			position = position_backup()
 			
@@ -179,11 +158,24 @@ func _physics_process(delta: float) -> void:
 			velocity = inputs.motion * speed
 			
 			move_and_slide()
-
+	
 func should_sync() -> bool:
 	if Input.is_anything_pressed():
 		return true
 	return false
+
+@rpc("any_peer", "call_local")
+func sync():
+	data = {"position": position, 
+			"rotation": rotation, 
+			"lantern_lit": lantern_lit,
+			"in_menu": in_menu
+			}
+	GameManager.players[int(name)]["data"] = data
+	#backup last known positions
+	if delay >= 0.5:
+		delay = 0.0
+		backup_position(3)
 
 func backup_position(size:int):
 	last_known_pos.append(position)
