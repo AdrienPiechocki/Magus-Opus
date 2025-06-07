@@ -1,6 +1,7 @@
 [gd_scene load_steps=18 format=3 uid="uid://c2hga5cenvr6p"]
 
 [ext_resource type="Script" uid="uid://bqp2k3u1nrftl" path="res://Scripts/Characters/Player/Player.gd" id="1_44qme"]
+[ext_resource type="PackedScene" uid="uid://cx65bwbjouxgm" path="res://Prefabs/Players/LightDetector.tscn" id="2_c6tfb"]
 [ext_resource type="Script" uid="uid://yw180iquco87" path="res://Scripts/Characters/SpriteManager.gd" id="3_c6tfb"]
 [ext_resource type="Texture2D" uid="uid://bsu3scropktpl" path="res://Graphics/textures/Player/Idle/Player_N.png" id="4_c6tfb"]
 [ext_resource type="Texture2D" uid="uid://ch08vhpolf76c" path="res://Graphics/textures/Player/Idle/Player_NE.png" id="5_bwrxq"]
@@ -11,8 +12,7 @@
 [ext_resource type="Texture2D" uid="uid://b3122ebgkgy5" path="res://Graphics/textures/Player/Idle/Player_W.png" id="10_6cg83"]
 [ext_resource type="Texture2D" uid="uid://dv1v55jegty1g" path="res://Graphics/textures/Player/Idle/Player_NW.png" id="11_14hcy"]
 [ext_resource type="Script" uid="uid://c2s40v7gla3u6" path="res://Scripts/Characters/Player/PlayerInputs.gd" id="12_havlv"]
-[ext_resource type="Texture2D" uid="uid://yxmd5clogng3" path="res://Graphics/textures/Player/Hands/Dagger/Dagger_Idle.PNG" id="12_udiyv"]
-[ext_resource type="PackedScene" uid="uid://cdiokfvfbqsxh" path="res://Scenes/UserInterface.tscn" id="14_c6tfb"]
+[ext_resource type="PackedScene" uid="uid://bbnsa4ei0o0lk" path="res://Prefabs/Players/UserInterface.tscn" id="14_c6tfb"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_5wxv7"]
 
@@ -28,13 +28,13 @@ material = SubResource("StandardMaterial3D_udiyv")
 size = Vector2(2, 2)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2xbkd"]
-properties/0/path = NodePath("Head/Lantern:light_energy")
+properties/0/path = NodePath("Sprite:mat")
 properties/0/spawn = true
 properties/0/replication_mode = 1
-properties/1/path = NodePath("Head:rotation")
+properties/1/path = NodePath(".:lantern_lit")
 properties/1/spawn = true
 properties/1/replication_mode = 1
-properties/2/path = NodePath("Sprite:mat")
+properties/2/path = NodePath(".:in_menu")
 properties/2/spawn = true
 properties/2/replication_mode = 1
 
@@ -48,6 +48,8 @@ billboard = 2
 
 [node name="Hitbox" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_5wxv7")
+
+[node name="LightDetector" parent="." instance=ExtResource("2_c6tfb")]
 
 [node name="Sprite" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.025651, 0, 0)
@@ -65,41 +67,18 @@ NorthWest = ExtResource("11_14hcy")
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.66, 0)
 
-[node name="Head" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.66, 0)
+[node name="UI" parent="Camera3D" instance=ExtResource("14_c6tfb")]
 
-[node name="Lantern" type="OmniLight3D" parent="Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -0.2)
+[node name="Lantern" type="OmniLight3D" parent="."]
 light_color = Color(1, 0.906667, 0.6, 1)
 light_energy = 0.0
+light_size = 1.5
+light_specular = 0.0
 omni_range = 3.0
-
-[node name="Hands" type="CanvasLayer" parent="."]
-
-[node name="RightHand" type="TextureRect" parent="Hands"]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -278.0
-offset_top = -416.0
-offset_right = -213.0
-offset_bottom = -273.0
-grow_horizontal = 0
-grow_vertical = 0
-scale = Vector2(3, 3)
-texture = ExtResource("12_udiyv")
-
-[node name="LeftHand" type="TextureRect" parent="Hands"]
-offset_right = 40.0
-offset_bottom = 40.0
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_2xbkd")
 
 [node name="Inputs" type="Node" parent="."]
 script = ExtResource("12_havlv")
-
-[node name="UserInterface" parent="." instance=ExtResource("14_c6tfb")]
-visible = false
+max_lean = -20.0

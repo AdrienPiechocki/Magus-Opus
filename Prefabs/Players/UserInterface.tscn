@@ -1,6 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://cdiokfvfbqsxh"]
+[gd_scene load_steps=7 format=3 uid="uid://bbnsa4ei0o0lk"]
 
-[ext_resource type="Script" uid="uid://bi2wha2ms4nmx" path="res://Scripts/Characters/Player/UIManager.gd" id="1_ofew4"]
+[ext_resource type="Script" uid="uid://bi2wha2ms4nmx" path="res://Scripts/Characters/Player/UIManager.gd" id="1_qqgm3"]
+[ext_resource type="Texture2D" uid="uid://w2hj60n64imk" path="res://Graphics/icon.svg" id="2_vv1l4"]
+[ext_resource type="Texture2D" uid="uid://yxmd5clogng3" path="res://Graphics/textures/Player/Hands/Dagger/Dagger_Idle.PNG" id="3_2mxdi"]
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_xc8ml"]
 color = Color(0.593134, 0.593134, 0.593134, 1)
@@ -13,17 +15,11 @@ thickness = 3
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ofew4"]
 bg_color = Color(0.779291, 0.779291, 0.779291, 1)
 
-[node name="UserInterface" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1_ofew4")
+[node name="UI" type="CanvasLayer"]
+script = ExtResource("1_qqgm3")
 
 [node name="Menu" type="Panel" parent="."]
-layout_mode = 1
+visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -101,8 +97,59 @@ offset_bottom = 89.0
 theme_override_styles/slider = SubResource("StyleBoxLine_xc8ml")
 theme_override_styles/grabber_area = SubResource("StyleBoxFlat_xc8ml")
 theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_ofew4")
-max_value = 0.5
+min_value = 0.5
+max_value = 2.0
 step = 0.05
+value = 0.5
+
+[node name="Hands" type="CanvasLayer" parent="."]
+
+[node name="RightHand" type="TextureRect" parent="Hands"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -278.0
+offset_top = -416.0
+offset_right = -213.0
+offset_bottom = -273.0
+grow_horizontal = 0
+grow_vertical = 0
+scale = Vector2(3, 3)
+texture = ExtResource("3_2mxdi")
+
+[node name="LeftHand" type="TextureRect" parent="Hands"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="LightMeter" type="ProgressBar" parent="HUD"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -218.0
+offset_right = 62.0
+grow_vertical = 0
+max_value = 0.5
+fill_mode = 3
+
+[node name="Crosshair" type="TextureRect" parent="HUD"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_vv1l4")
+expand_mode = 1
 
 [connection signal="pressed" from="Menu/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="Menu/Exit" to="." method="_on_exit_pressed"]

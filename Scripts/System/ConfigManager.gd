@@ -19,7 +19,7 @@ func load_config():
 
 func create_config(config:ConfigFile):
 	#create default values
-	config.set_value("Graphics", "brightness", 0.0)
+	config.set_value("Graphics", "brightness", 1.0)
 	
 	#save config
 	config.save("user://settings.cfg")

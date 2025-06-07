@@ -16,7 +16,6 @@
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tgh55"]
 resource_local_to_scene = true
 transparency = 1
-diffuse_mode = 1
 albedo_texture = ExtResource("4_yxwh2")
 billboard_mode = 2
 
@@ -43,3 +42,9 @@ South = ExtResource("8_ivyr1")
 SouthWest = ExtResource("9_kbcrf")
 West = ExtResource("10_ps1u0")
 NorthWest = ExtResource("11_y4hog")
+
+[node name="Torchlight" type="SpotLight3D" parent="."]
+light_color = Color(1, 0.906667, 0.6, 1)
+light_energy = 2.0
+spot_range = 10.0
+spot_angle = 30.0
