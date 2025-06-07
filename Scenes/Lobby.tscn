@@ -199,14 +199,6 @@ theme_override_colors/font_hovered_selected_color = Color(0, 0, 0, 1)
 theme_override_colors/font_hovered_color = Color(0, 0, 0, 1)
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 
-[node name="CopyOID" type="Button" parent="Players"]
-layout_mode = 0
-offset_left = 20.5
-offset_top = 306.5
-offset_right = 100.5
-offset_bottom = 337.5
-text = "Copy OID"
-
 [node name="Start" type="Button" parent="Players"]
 layout_mode = 0
 offset_left = 69.0
@@ -218,10 +210,10 @@ text = "Start"
 
 [node name="Ready" type="Button" parent="Players"]
 layout_mode = 0
-offset_left = 118.5
-offset_top = 305.5
-offset_right = 197.5
-offset_bottom = 336.5
+offset_left = 69.0
+offset_top = 306.0
+offset_right = 148.0
+offset_bottom = 337.0
 toggle_mode = true
 text = "Ready"
 
@@ -253,7 +245,6 @@ horizontal_alignment = 1
 [connection signal="pressed" from="Connect/Join" to="." method="_on_join_pressed"]
 [connection signal="toggled" from="Connect/Hide" to="." method="_on_hide_toggled"]
 [connection signal="pressed" from="Connect/Back" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="Players/CopyOID" to="." method="_on_copy_oid_pressed"]
 [connection signal="pressed" from="Players/Start" to="." method="_on_start_pressed"]
 [connection signal="toggled" from="Players/Ready" to="." method="_on_ready_toggled"]
 [connection signal="pressed" from="Players/Back" to="." method="_on_back_pressed"]

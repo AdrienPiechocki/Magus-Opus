@@ -50,7 +50,6 @@ func _ready() -> void:
 	multiplayer.allow_object_decoding = true
 	mat = mesh.surface_get_material(0).duplicate()
 	dir_contents(sprites_dir)
-	print(sprites)
 
 func dir_contents(path):
 	var dir = DirAccess.open(path)

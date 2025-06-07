@@ -47,7 +47,6 @@ func _on_host_pressed():
 	var player_name = $Connect/Name.text
 	var password = $Connect/Password.text
 	GameManager.host_game(player_name, password)
-	$Players/CopyOID.disabled = true
 
 
 func _on_join_pressed():
@@ -62,7 +61,6 @@ func _on_join_pressed():
 	var ip = $Connect/IPAddress.text
 	var password = $Connect/Password.text
 	GameManager.join_game(ip, player_name, password)
-	$Players/CopyOID.disabled = true
 
 func _on_back_pressed() -> void:
 	$Choice/Name.text = $Connect/Name.text

@@ -23,7 +23,7 @@ func _on_exit_pressed() -> void:
 	
 func _on_back_pressed() -> void:
 	$Menu.hide()
-	_player.Inputs.in_menu = false
+	_player.in_menu = false
 
 func _on_brightness_slider_drag_ended(value_changed: bool) -> void:
 	if value_changed:

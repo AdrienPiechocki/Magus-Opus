@@ -5,7 +5,6 @@ enum State {
 	STATE_LEANING,
 	STATE_CROUCHING,
 	STATE_CRAWLING,
-	STATE_NOCLIP,
 }
 var state = State.STATE_WALKING
 
@@ -39,7 +38,8 @@ var camera_pos_y:float = 0.66
 
 func _ready() -> void:
 	camera_starting_pos = Camera.position
-
+	Hitbox.shape = Hitbox.shape.duplicate()
+	
 func _physics_process(delta: float) -> void:
 	movement(delta)
 	camera_bob(delta)
@@ -68,7 +68,9 @@ func _physics_process(delta: float) -> void:
 					idle_bob_amount = 0.02
 				if camera_pos_y < camera_starting_pos.y-idle_bob_amount:
 					camera_pos_y += delta * 3
-				Hitbox.shape.height = 2
+					
+				set_collision_height(2.0)
+				
 				if Input.is_action_pressed("lean_left") or Input.is_action_pressed("lean_right"):
 					state = State.STATE_LEANING
 					return
@@ -93,9 +95,6 @@ func _physics_process(delta: float) -> void:
 						idle_bob_speed = 22
 						idle_bob_amount = 0.08
 				
-				if Input.is_action_just_pressed("noclip"):
-					state = State.STATE_NOCLIP
-					return
 			State.STATE_LEANING:
 				lean()
 			
@@ -105,9 +104,6 @@ func _physics_process(delta: float) -> void:
 			State.STATE_CRAWLING:
 				crawl(delta)
 			
-			State.STATE_NOCLIP:
-				pass
-				
 
 
 func movement(delta: float):
@@ -156,7 +152,7 @@ func lean():
 
 func crouch():
 	speed = slow_speed
-	Hitbox.shape.height = 1.5
+	set_collision_height(1.5)
 	if Input.is_action_just_released("crouch"):
 		state = State.STATE_WALKING
 		return
@@ -165,7 +161,7 @@ func crawl(delta:float):
 	if camera_pos_y > 0:
 		camera_pos_y -= delta * 2
 	speed = slow_speed - 2
-	Hitbox.shape.height = 1
+	set_collision_height(1.0)
 	if Input.is_action_just_released("crawl"):
 		state = State.STATE_WALKING
 		return
@@ -198,3 +194,7 @@ func camera_bob(delta:float):
 	bob_time += delta * idle_bob_speed
 	Camera.position.y = camera_pos_y + sin(bob_time) * idle_bob_amount
 	Hands.offset.y = -sin(bob_time/2) * idle_bob_amount * 100
+
+func set_collision_height(val:float):
+	if (1 in GameManager.players.keys() and GameManager.players[1]["solo"]) or is_multiplayer_authority():
+		Hitbox.shape.height = val

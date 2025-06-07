@@ -1,6 +1,5 @@
 extends Node
 
-const NORAY_ADDRESS:String = "tomfol.io"
 const DEFAULT_PORT:int = 8890
 
 # Max number of peers.
@@ -9,7 +8,6 @@ const MAX_PEERS:int = 3
 var peer:ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 
 var is_host:bool = false
-var external_oid:String = ""
 @export var server_started:bool = false
 
 # Name for my player.
