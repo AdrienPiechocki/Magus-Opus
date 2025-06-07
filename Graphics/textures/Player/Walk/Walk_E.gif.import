@@ -1,0 +1,14 @@
+[remap]
+
+importer="import_gif_to_animated_texture"
+type="AnimatedTexture"
+uid="uid://3l8gk675v6px"
+path="res://.godot/imported/Walk_E.gif-2b898bf79016f909e343b435f0d0e904.tres"
+
+[deps]
+
+source_file="res://Graphics/textures/Player/Walk/Walk_E.gif"
+dest_files=["res://.godot/imported/Walk_E.gif-2b898bf79016f909e343b435f0d0e904.tres"]
+
+[params]
+

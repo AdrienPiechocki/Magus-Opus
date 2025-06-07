@@ -2,6 +2,7 @@
 extends SubViewport
 
 @export var axes:int = 8
+@export var _name:String
 
 @export_tool_button("Generate Sprite")
 var generate_sprite = func():
@@ -14,5 +15,5 @@ var generate_sprite = func():
 		await RenderingServer.frame_post_draw
 		var image = get_texture().get_image()
 		result = image
-		result.save_png("user://sprites"+str(i+1)+".png")
+		result.save_png("user://sprite_"+_name+"_"+str(i+1)+".png")
 		angle += TAU / 8

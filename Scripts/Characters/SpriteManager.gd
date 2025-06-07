@@ -5,33 +5,111 @@ var mat:StandardMaterial3D
 var angle:float
 var pos:Vector3
 
-@export var North:Texture
-@export var NorthEast:Texture
-@export var East:Texture
-@export var SouthEast:Texture
-@export var South:Texture
-@export var SouthWest:Texture
-@export var West:Texture
-@export var NorthWest:Texture
+@export_dir var sprites_dir
+@export_enum("Idle", "Walk") var state
+var states:Array = ["Idle", "Walk"]
 
-@onready var sideToMaterial:Array = [
-	NorthWest,
-	North,
-	NorthEast,
-	East,
-	SouthEast,
-	South,
-	SouthWest,
-	West
-]
+var sprites:Dictionary = {
+	"Idle" : {
+		"North": "",
+		"NorthEast": "",
+		"East": "",
+		"SouthEast": "",
+		"South": "",
+		"SouthWest": "",
+		"West": "",
+		"NorthWest": ""
+	},
+	"Walk" : {
+		
+		"North": "",
+		"NorthEast": "",
+		"East": "",
+		"SouthEast": "",
+		"South": "",
+		"SouthWest": "",
+		"West": "",
+		"NorthWest": ""
+	}
+}
+
+var North
+var NorthEast
+var East
+var SouthEast
+var South
+var SouthWest
+var West
+var NorthWest
+
+var sideToMaterial:Array
 
 var currentSide:int
 
 func _ready() -> void:
 	multiplayer.allow_object_decoding = true
 	mat = mesh.surface_get_material(0).duplicate()
-	
+	dir_contents(sprites_dir)
+	print(sprites)
+
+func dir_contents(path):
+	var dir = DirAccess.open(path)
+	dir.list_dir_begin()
+	var file_name = dir.get_next()
+	while file_name != "":
+		if dir.current_is_dir():
+			if file_name == "Idle":
+				set_sprites(path, file_name)
+			if file_name == "Walk":
+				set_sprites(path, file_name)
+		file_name = dir.get_next()
+
+func set_sprites(path, folder):
+	var dir = DirAccess.open(path+"/"+folder)
+	dir.list_dir_begin()
+	var file_name = dir.get_next()
+	while file_name != "":
+		if file_name.ends_with(".png") or file_name.ends_with(".gif"):
+			var no_ext = file_name.left(file_name.length() - 4)
+			if no_ext.ends_with("_N"):
+				sprites[folder]["North"] = load(path+"/"+folder+"/"+file_name)
+			if no_ext.ends_with("_NE"):
+				sprites[folder]["NorthEast"] = load(path+"/"+folder+"/"+file_name)
+			if no_ext.ends_with("_E"):
+				sprites[folder]["East"] = load(path+"/"+folder+"/"+file_name)
+			if no_ext.ends_with("_SE"):
+				sprites[folder]["SouthEast"] = load(path+"/"+folder+"/"+file_name)
+			if no_ext.ends_with("_S"):
+				sprites[folder]["South"] = load(path+"/"+folder+"/"+file_name)
+			if no_ext.ends_with("_SW"):
+				sprites[folder]["SouthWest"] = load(path+"/"+folder+"/"+file_name)
+			if no_ext.ends_with("_W"):
+				sprites[folder]["West"] = load(path+"/"+folder+"/"+file_name)
+			if no_ext.ends_with("_NW"):
+				sprites[folder]["NorthWest"] = load(path+"/"+folder+"/"+file_name)
+		file_name = dir.get_next()
+
 func _process(_delta: float) -> void:
+	North = (sprites[states[state]]["North"])
+	NorthEast = (sprites[states[state]]["NorthEast"])
+	East = (sprites[states[state]]["East"])
+	SouthEast = (sprites[states[state]]["SouthEast"])
+	South = (sprites[states[state]]["South"])
+	SouthWest = (sprites[states[state]]["SouthWest"])
+	West = (sprites[states[state]]["West"])
+	NorthWest = (sprites[states[state]]["NorthWest"])
+	
+	sideToMaterial = [
+		NorthWest,
+		North,
+		NorthEast,
+		East,
+		SouthEast,
+		South,
+		SouthWest,
+		West
+	]
+	
 	if 1 in GameManager.players and GameManager.players[1]["solo"]:
 		angle = round_to_dec(get_parent().rotation_degrees.y, 1)
 		set_orientation(angle)
@@ -139,7 +217,7 @@ func update():
 func round_to_dec(num, digit):
 	return round(num * pow(10.0, digit)) / pow(10.0, digit)
 
-@rpc("any_peer", "call_local")
+@rpc("any_peer", "unreliable")
 func set_orientation(m_angle:float):
 	if m_angle >= -157.5 and m_angle <= -112.6:
 		#print(get_parent().name, " looking NorthEast")

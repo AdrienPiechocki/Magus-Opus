@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dm5rgqysousaa"
-path.s3tc="res://.godot/imported/GuardNW.png-c1af8c70e7476480bf37a49326151099.s3tc.ctex"
-path.etc2="res://.godot/imported/GuardNW.png-c1af8c70e7476480bf37a49326151099.etc2.ctex"
+uid="uid://bdw3ul5g2f4ke"
+path.s3tc="res://.godot/imported/Guard_N.png-5918248727586c4e7f2539d6b560c0d8.s3tc.ctex"
+path.etc2="res://.godot/imported/Guard_N.png-5918248727586c4e7f2539d6b560c0d8.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://Graphics/textures/Guard/GuardNW.png"
-dest_files=["res://.godot/imported/GuardNW.png-c1af8c70e7476480bf37a49326151099.s3tc.ctex", "res://.godot/imported/GuardNW.png-c1af8c70e7476480bf37a49326151099.etc2.ctex"]
+source_file="res://Graphics/textures/Guard/Idle/Guard_N.png"
+dest_files=["res://.godot/imported/Guard_N.png-5918248727586c4e7f2539d6b560c0d8.s3tc.ctex", "res://.godot/imported/Guard_N.png-5918248727586c4e7f2539d6b560c0d8.etc2.ctex"]
 
 [params]
 

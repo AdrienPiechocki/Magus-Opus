@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dxinsug0pk000"
-path="res://.godot/imported/GuardSE.png-9e9b24d4e65afcaab7bcd8a84e56fa1d.ctex"
+uid="uid://njgnvya7tcq0"
+path="res://.godot/imported/Guard_SW.png-eff7b01d9673ab68411686c86ccf6404.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Graphics/textures/Guard/GuardSE.png"
-dest_files=["res://.godot/imported/GuardSE.png-9e9b24d4e65afcaab7bcd8a84e56fa1d.ctex"]
+source_file="res://Graphics/textures/Guard/Idle/Guard_SW.png"
+dest_files=["res://.godot/imported/Guard_SW.png-eff7b01d9673ab68411686c86ccf6404.ctex"]
 
 [params]
 

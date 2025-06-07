@@ -50,7 +50,7 @@ func _process(_delta: float) -> void:
 	if not GameManager.get_player_list().is_empty() and not is_name_set:
 		is_name_set = true
 		
-	if is_multiplayer_authority():
+	if (1 in GameManager.players.keys() and GameManager.players[1]["solo"]) or is_multiplayer_authority():
 		Menu.visible = in_menu
 		HUD.visible = !in_menu
 	
@@ -97,7 +97,17 @@ func _physics_process(delta: float) -> void:
 			velocity = Inputs.motion * Inputs.speed
 			velocity.y = Inputs.motion.y * Inputs.base_speed
 			move_and_slide()
-	
+			
+		if velocity.length() > 0 and is_multiplayer_authority():
+			set_sprite_state.rpc(1)
+		else:
+			set_sprite_state.rpc(0)
+
+@rpc("any_peer", "unreliable")
+func set_sprite_state(val:int):
+	if not is_multiplayer_authority():
+		Sprite.state = val
+
 func should_sync() -> bool:
 	if Input.is_anything_pressed():
 		return true

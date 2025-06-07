@@ -1,17 +1,18 @@
 [gd_scene load_steps=3 format=3 uid="uid://7f7l4p7vag76"]
 
-[ext_resource type="PackedScene" uid="uid://d4al8xfet7mon" path="res://Graphics/meshes/Adventurer.fbx" id="1_rkwvs"]
 [ext_resource type="Script" uid="uid://pbf7jhc78e5g" path="res://Scripts/System/SpriteGenerator.gd" id="1_w5xtm"]
+[ext_resource type="PackedScene" uid="uid://dkfgr1rdoks6g" path="res://Prefabs/adventurer.tscn" id="2_w5xtm"]
 
 [node name="SpriteGenerator" type="SubViewport"]
 transparent_bg = true
 size = Vector2i(256, 256)
 script = ExtResource("1_w5xtm")
+_name = "12"
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2)
 projection = 1
 size = 2.0
 
-[node name="Adventurer" parent="." instance=ExtResource("1_rkwvs")]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0, 0.1, 0)
+[node name="Adventurer" parent="." instance=ExtResource("2_w5xtm")]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0, 0, 0)

@@ -34,7 +34,8 @@ var camera_pos_y:float = 0.66
 @onready var Sprite:MeshInstance3D = $"../Sprite"
 @onready var Hands:CanvasLayer = $"../Camera3D/UI/Hands"
 @onready var Left_hand:TextureRect = $"../Camera3D/UI/Hands/LeftHand"
-@onready var Rzight_hand:TextureRect = $"../Camera3D/UI/Hands/RightHand"
+@onready var Right_hand:TextureRect = $"../Camera3D/UI/Hands/RightHand"
+@onready var Hitbox:CollisionShape3D = $"../Hitbox"
 
 func _ready() -> void:
 	camera_starting_pos = Camera.position
@@ -42,7 +43,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	movement(delta)
 	camera_bob(delta)
-	if is_multiplayer_authority():
+	if (1 in GameManager.players.keys() and GameManager.players[1]["solo"]) or is_multiplayer_authority():
 		toggle_mouse()
 	
 	#ANY STATE ACTIONS:
@@ -67,7 +68,7 @@ func _physics_process(delta: float) -> void:
 					idle_bob_amount = 0.02
 				if camera_pos_y < camera_starting_pos.y-idle_bob_amount:
 					camera_pos_y += delta * 3
-					
+				Hitbox.shape.height = 2
 				if Input.is_action_pressed("lean_left") or Input.is_action_pressed("lean_right"):
 					state = State.STATE_LEANING
 					return
@@ -99,7 +100,7 @@ func _physics_process(delta: float) -> void:
 				lean()
 			
 			State.STATE_CROUCHING:
-				crouch(delta)
+				crouch()
 			
 			State.STATE_CRAWLING:
 				crawl(delta)
@@ -153,18 +154,18 @@ func lean():
 		state = State.STATE_WALKING
 		return
 
-func crouch(delta:float):
-	if camera_pos_y > 0:
-		camera_pos_y -= delta * 2
+func crouch():
 	speed = slow_speed
+	Hitbox.shape.height = 1.5
 	if Input.is_action_just_released("crouch"):
 		state = State.STATE_WALKING
 		return
 
 func crawl(delta:float):
-	if camera_pos_y > -0.66:
+	if camera_pos_y > 0:
 		camera_pos_y -= delta * 2
 	speed = slow_speed - 2
+	Hitbox.shape.height = 1
 	if Input.is_action_just_released("crawl"):
 		state = State.STATE_WALKING
 		return

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bdam4uoo3aocs"
-path="res://.godot/imported/GuardWest.png-8d58e35bf76e9cbb8eacdcfde9210724.ctex"
+path="res://.godot/imported/Guard_W.png-745a08d54c444bc95b0ed3a9d19539ef.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Graphics/textures/Guard/GuardWest.png"
-dest_files=["res://.godot/imported/GuardWest.png-8d58e35bf76e9cbb8eacdcfde9210724.ctex"]
+source_file="res://Graphics/textures/Guard/Idle/Guard_W.png"
+dest_files=["res://.godot/imported/Guard_W.png-745a08d54c444bc95b0ed3a9d19539ef.ctex"]
 
 [params]
 
