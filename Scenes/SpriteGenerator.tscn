@@ -7,12 +7,15 @@
 transparent_bg = true
 size = Vector2i(256, 256)
 script = ExtResource("1_w5xtm")
-_name = "12"
+_name = "Run"
+animation_name = "CharacterArmature|Run"
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2)
 projection = 1
 size = 2.0
 
-[node name="Adventurer" parent="." instance=ExtResource("2_w5xtm")]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0, 0, 0)
+[node name="Model" type="Node3D" parent="."]
+
+[node name="Adventurer" parent="Model" instance=ExtResource("2_w5xtm")]
+transform = Transform3D(-0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, -0.707107, 0, 0, 0)

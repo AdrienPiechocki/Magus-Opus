@@ -1,0 +1,14 @@
+[remap]
+
+importer="import_gif_to_animated_texture"
+type="AnimatedTexture"
+uid="uid://bdpaoc7lmfx2l"
+path="res://.godot/imported/Run_S.gif-60f93ef75268d86e6dd527a15fd90a11.tres"
+
+[deps]
+
+source_file="res://Graphics/textures/Player/Run/Run_S.gif"
+dest_files=["res://.godot/imported/Run_S.gif-60f93ef75268d86e6dd527a15fd90a11.tres"]
+
+[params]
+
