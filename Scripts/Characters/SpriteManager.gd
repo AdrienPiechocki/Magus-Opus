@@ -8,8 +8,9 @@ var angle:float
 var pos:Vector3
 
 @export_dir var sprites_dir
-@export_enum("Idle", "Walk") var state
-var states:Array = ["Idle", "Walk"]
+@export_enum("Idle", "Walk", "Run") var state
+var states:Array = ["Idle", "Walk", "Run"]
+var animation_speed:float = 1.0
 
 var sprites:Dictionary = {
 	"Idle" : {
@@ -23,7 +24,16 @@ var sprites:Dictionary = {
 		"NorthWest": Texture.new()
 	},
 	"Walk" : {
-		
+		"North": Texture.new(),
+		"NorthEast": Texture.new(),
+		"East": Texture.new(),
+		"SouthEast": Texture.new(),
+		"South": Texture.new(),
+		"SouthWest": Texture.new(),
+		"West": Texture.new(),
+		"NorthWest": Texture.new()
+	},
+	"Run" : {
 		"North": Texture.new(),
 		"NorthEast": Texture.new(),
 		"East": Texture.new(),
@@ -56,7 +66,7 @@ func _ready() -> void:
 func set_sprites():
 	for id in _spritesDB.DB.keys():
 		if id == get_parent().name or id == get_parent().get_parent().name:
-			for status in sprites.keys():
+			for status in states:
 				sprites[status]["North"] = _spritesDB.DB[id][status]["North"]
 				sprites[status]["NorthEast"] = _spritesDB.DB[id][status]["NorthEast"]
 				sprites[status]["East"] = _spritesDB.DB[id][status]["East"]
@@ -86,6 +96,10 @@ func _process(_delta: float) -> void:
 		SouthWest,
 		West
 	]
+	
+	for side in sideToMaterial:
+		if side is AnimatedTexture:
+			side.speed_scale = animation_speed
 	
 	if npc or (1 in GameManager.players and GameManager.players[1]["solo"]):
 		angle = round_to_dec(get_parent().rotation_degrees.y, 1)

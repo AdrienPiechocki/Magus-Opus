@@ -60,15 +60,19 @@ func _physics_process(delta: float) -> void:
 	match state:
 			State.STATE_WALKING:
 				speed = base_speed
-				if _player.velocity.length() > 0:
+				
+				if _player.velocity.length() > 0 and _player.is_multiplayer_authority():
+					set_sprite_state.rpc(1)
 					idle_bob_speed = 12
 					idle_bob_amount = 0.04
 				else:
+					set_sprite_state.rpc(0)
 					idle_bob_speed = 6
 					idle_bob_amount = 0.02
+				
 				if camera_pos_y < camera_starting_pos.y-idle_bob_amount:
 					camera_pos_y += delta * 3
-					
+				
 				set_collision_height(2.0)
 				
 				if Input.is_action_pressed("lean_left") or Input.is_action_pressed("lean_right"):
@@ -86,12 +90,14 @@ func _physics_process(delta: float) -> void:
 				if Input.is_action_pressed("sneak"):
 					speed = slow_speed
 					if _player.velocity.length() > 0:
+						set_sprite_state.rpc(1, 0.4)
 						idle_bob_speed = 6
 						idle_bob_amount = 0.02
 					
 				if Input.is_action_pressed("sprint"):
 					speed = fast_speed
 					if _player.velocity.length() > 0:
+						set_sprite_state.rpc(2)
 						idle_bob_speed = 22
 						idle_bob_amount = 0.08
 				
@@ -198,3 +204,10 @@ func camera_bob(delta:float):
 func set_collision_height(val:float):
 	if (1 in GameManager.players.keys() and GameManager.players[1]["solo"]) or is_multiplayer_authority():
 		Hitbox.shape.height = val
+
+
+@rpc("any_peer", "unreliable")
+func set_sprite_state(_state:int, _speed:float = 1.0):
+	if not is_multiplayer_authority():
+		Sprite.state = _state
+		Sprite.animation_speed = _speed

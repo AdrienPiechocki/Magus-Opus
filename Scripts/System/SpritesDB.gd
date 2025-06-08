@@ -22,6 +22,16 @@ var DB:Dictionary = {
 			"SouthWest": preload("res://Graphics/textures/Player/Walk/Walk_SW.gif"),
 			"West": preload("res://Graphics/textures/Player/Walk/Walk_W.gif"),
 			"NorthWest": preload("res://Graphics/textures/Player/Walk/Walk_NW.gif")
+		},
+		"Run": {
+			"North": preload("res://Graphics/textures/Player/Run/Run_N.gif"),
+			"NorthEast": preload("res://Graphics/textures/Player/Run/Run_NE.gif"),
+			"East": preload("res://Graphics/textures/Player/Run/Run_E.gif"),
+			"SouthEast": preload("res://Graphics/textures/Player/Run/Run_SE.gif"),
+			"South": preload("res://Graphics/textures/Player/Run/Run_S.gif"),
+			"SouthWest": preload("res://Graphics/textures/Player/Run/Run_SW.gif"),
+			"West": preload("res://Graphics/textures/Player/Run/Run_W.gif"),
+			"NorthWest": preload("res://Graphics/textures/Player/Run/Run_NW.gif")
 		}
 	},
 	"Guard": {
@@ -36,6 +46,16 @@ var DB:Dictionary = {
 			"NorthWest": preload("res://Graphics/textures/Guard/Idle/Guard_NW.png")
 		},
 		"Walk" : {
+			"North": Texture.new(),
+			"NorthEast": Texture.new(),
+			"East": Texture.new(),
+			"SouthEast": Texture.new(),
+			"South": Texture.new(),
+			"SouthWest": Texture.new(),
+			"West": Texture.new(),
+			"NorthWest": Texture.new()
+		},
+		"Run" : {
 			"North": Texture.new(),
 			"NorthEast": Texture.new(),
 			"East": Texture.new(),

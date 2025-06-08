@@ -97,16 +97,6 @@ func _physics_process(delta: float) -> void:
 			velocity = Inputs.motion * Inputs.speed
 			velocity.y = Inputs.motion.y * Inputs.base_speed
 			move_and_slide()
-		
-		if velocity.length() > 0 and is_multiplayer_authority():
-			set_sprite_state.rpc(1)
-		else:
-			set_sprite_state.rpc(0)
-
-@rpc("any_peer", "unreliable")
-func set_sprite_state(val:int):
-	if not is_multiplayer_authority():
-		Sprite.state = val
 
 func should_sync() -> bool:
 	if Input.is_anything_pressed():
