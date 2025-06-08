@@ -18,7 +18,7 @@ var player_name:String = "Player"
 @export var non_server_players:Array 
 
 var world:PackedScene = preload("res://Scenes/World.tscn")
-var player_scene:PackedScene = preload("res://Prefabs/Players/player.tscn")
+var player_scene:PackedScene = preload("res://Prefabs/Players/Player.tscn")
 
 # Signals to let lobby GUI know what's going on.
 signal connection_failed()
@@ -58,7 +58,7 @@ func _process(_delta: float) -> void:
 				load_world.rpc_id(player)
 				player_joined_in_game.emit()
 				players[player]["in_game"] = true
-				join_existing_game.rpc_id(1)
+				join_existing_game()
 				
 	server_started = !players.keys().is_empty()
 
@@ -100,9 +100,9 @@ func register_player(new_player_name):
 	players[id] = {"name": new_player_name, 
 					"solo": false,
 					"dedicated_server": false,
+					"password": "",
 					"ready": false, 
 					"in_game": false, 
-					"password": "",
 					"data": {"position": Vector3(0, 1, 0),
 							"rotation": Vector3(0, 0, 0),
 							"lantern_lit": false,
@@ -185,7 +185,7 @@ func begin_game():
 		spawns.append(p)
 
 	for p_id: int in spawns:
-		spawn_player(p_id, GameManager.players[p_id]["data"])
+		spawn_player.rpc(p_id, GameManager.players[p_id]["data"])
 
 @rpc("any_peer", "call_local")
 func join_existing_game():

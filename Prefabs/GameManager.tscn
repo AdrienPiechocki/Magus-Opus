@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://b4aronf3viax3"]
+[gd_scene load_steps=5 format=3 uid="uid://b4aronf3viax3"]
 
 [ext_resource type="Script" uid="uid://5ka6vhemksjo" path="res://Scripts/System/GameManager.gd" id="1_4v1xe"]
 [ext_resource type="Script" uid="uid://cudn1jdfas54a" path="res://Scripts/System/ConfigManager.gd" id="2_uc36f"]
+[ext_resource type="Script" uid="uid://bacdu1chmi10a" path="res://Scripts/System/SpritesDB.gd" id="3_08p52"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_4v1xe"]
 properties/0/path = NodePath(".:server_started")
@@ -19,6 +20,9 @@ script = ExtResource("1_4v1xe")
 
 [node name="ConfigManager" type="Node" parent="."]
 script = ExtResource("2_uc36f")
+
+[node name="SpritesDB" type="Node" parent="."]
+script = ExtResource("3_08p52")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_4v1xe")

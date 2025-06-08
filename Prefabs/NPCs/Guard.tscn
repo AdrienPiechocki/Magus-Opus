@@ -16,7 +16,7 @@ billboard_mode = 2
 material = SubResource("StandardMaterial3D_tgh55")
 size = Vector2(1, 2)
 
-[node name="NPC" type="CharacterBody3D"]
+[node name="Guard" type="CharacterBody3D"]
 collision_layer = 2
 script = ExtResource("1_nrg37")
 

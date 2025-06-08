@@ -20,6 +20,7 @@ func _on_solo_pressed() -> void:
 	GameManager.players = {1: {"name": player_name, 
 								"solo": true,
 								"dedicated_server": false,
+								"password": "",
 								"ready": false, 
 								"in_game": false, 
 								"data": {"position": Vector3(0, 1, 0),

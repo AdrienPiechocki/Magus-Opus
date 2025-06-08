@@ -2,8 +2,8 @@
 
 [ext_resource type="Shader" uid="uid://om51lt5o24gl" path="res://Graphics/Shaders/Sky.gdshader" id="1_5nsto"]
 [ext_resource type="Texture2D" uid="uid://cjhdq0dp885un" path="res://Graphics/textures/moon.png" id="2_gjpho"]
-[ext_resource type="PackedScene" uid="uid://cwng1l8d3835m" path="res://Prefabs/NPCs/npc.tscn" id="2_j0p05"]
 [ext_resource type="PackedScene" uid="uid://bnx47e30r6hws" path="res://Prefabs/World/level.tscn" id="3_p70al"]
+[ext_resource type="PackedScene" uid="uid://cwng1l8d3835m" path="res://Prefabs/NPCs/Guard.tscn" id="4_gjpho"]
 
 [sub_resource type="Curve" id="Curve_5nsto"]
 _data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.195946, 0.966292), 0.0, 0.0, 0, 0, Vector2(0.736486, 0.662921), 0.0, 0.0, 0, 0]
@@ -75,12 +75,11 @@ directional_shadow_mode = 0
 
 [node name="Level" parent="." instance=ExtResource("3_p70al")]
 
-[node name="NPC" parent="Level" instance=ExtResource("2_j0p05")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6826, 1, 10.861)
+[node name="Guard" parent="Level" instance=ExtResource("4_gjpho")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1, 10)
 orientation = 45.0
 
 [node name="Players" type="Node3D" parent="."]
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://c2hga5cenvr6p")
 spawn_path = NodePath("../Players")

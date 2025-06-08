@@ -1,5 +1,4 @@
 extends Node3D
-class_name LightDetector
 
 @onready var _viewport = $Viewport
 @onready var _cam = $Viewport/Camera3D
@@ -21,10 +20,11 @@ func _process(_delta) -> void:
 	var new_pos = _player.global_transform.origin + Vector3.UP * 0.5
 	
 	_cam.global_transform.origin = new_pos
-	
+	if OS.has_feature("dedicated_server"):
+		return
 	if _last_time_since_detect + light_detect_interval > _get_time() and _last_time_since_detect != 0.0:
 		return
-	
+		
 	var level = get_light_level()
 	if _player.Inputs.state == _player.Inputs.State.STATE_CROUCHING and not _player.lantern_lit:
 		level = level / 1.2
@@ -35,9 +35,7 @@ func _process(_delta) -> void:
 
 
 func get_light_level() -> float:
-	var texture = null
-	
-	texture = _viewport.get_texture()
+	var texture = _viewport.get_texture()
 	
 	var color = get_average_color(texture)
 	
