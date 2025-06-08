@@ -9,7 +9,6 @@ var axes:Array = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
 var generate_sprite = func():
 	var model = $Model.get_child(0)
 	var animator:AnimationPlayer = null
-	var frame:float = 0.0
 	if model.has_node("AnimationPlayer"):
 		animator = model.get_node("AnimationPlayer")
 		if animation_name in animator.get_animation_list():

@@ -43,7 +43,6 @@ shape = SubResource("CapsuleShape3D_5wxv7")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.025651, 0, 0)
 mesh = SubResource("QuadMesh_hnwp3")
 script = ExtResource("4_ibj5h")
-sprites_dir = "res://Graphics/textures/Player"
 state = 0
 
 [node name="Camera3D" type="Camera3D" parent="."]
@@ -63,4 +62,3 @@ replication_config = SubResource("SceneReplicationConfig_2xbkd")
 
 [node name="Inputs" type="Node" parent="."]
 script = ExtResource("6_hlp8h")
-max_lean = -20.0

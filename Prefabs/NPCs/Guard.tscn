@@ -27,7 +27,6 @@ shape = SubResource("CapsuleShape3D_nrg37")
 mesh = SubResource("QuadMesh_whts2")
 script = ExtResource("3_tgh55")
 npc = true
-sprites_dir = "res://Graphics/textures/Guard"
 state = 0
 
 [node name="Torchlight" type="SpotLight3D" parent="."]

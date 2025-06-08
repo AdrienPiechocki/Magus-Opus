@@ -2,6 +2,7 @@ extends Control
 
 var ready_style:StyleBoxFlat = StyleBoxFlat.new()
 @onready var default_color:Color = $Choice.get_theme_stylebox("panel").bg_color
+@onready var config_manager = GameManager.get_node("ConfigManager")
 
 func _ready():
 	# Called every time the node is added to the scene.
@@ -168,16 +169,22 @@ func toggle_ready(toggle:bool):
 			var item = ids.bsearch(id)+1
 			$Players/List.set_item_custom_bg_color(item, (Color.LIME_GREEN if toggle else Color.LIGHT_YELLOW))
 	
-	for player in GameManager.players.keys():
-		if GameManager.players[player]["in_game"]:
-			if GameManager.players[multiplayer.get_unique_id()]["ready"]:
-				GameManager.load_world()
-				GameManager.player_joined_in_game.emit()
-				GameManager.join_existing_game.rpc_id(1)
-				return
+	if not OS.has_feature("dedicated_server"):
+		for player in GameManager.players.keys():
+			if GameManager.players[player]["in_game"]:
+				if GameManager.players[multiplayer.get_unique_id()]["ready"]:
+					GameManager.load_world()
+					GameManager.player_joined_in_game.emit()
+					GameManager.join_existing_game.rpc_id(1)
+					return
 
 func _on_start_pressed() -> void:
 	GameManager.begin_game()
 
 func _on_hide_toggled(toggled_on: bool) -> void:
 	$Connect/Password.secret = toggled_on
+
+
+func _on_name_text_changed(new_text: String) -> void:
+	config_manager.settings["Global"]["username"] = new_text
+	config_manager.save_config()

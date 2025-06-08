@@ -7,7 +7,6 @@ var mat:StandardMaterial3D
 var angle:float
 var pos:Vector3
 
-@export_dir var sprites_dir
 @export_enum("Idle", "Walk", "Run") var state
 var states:Array = ["Idle", "Walk", "Run"]
 var animation_speed:float = 1.0

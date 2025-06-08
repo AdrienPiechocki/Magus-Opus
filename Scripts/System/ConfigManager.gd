@@ -13,12 +13,15 @@ func load_config():
 		create_config(config)
 
 	#load config values
+	settings["Global"] = {
+		"username": config.get_value("Global", "username")
+	}
 	settings["Graphics"] = {
 		"brightness": config.get_value("Graphics", "brightness"),
 		}
-
 func create_config(config:ConfigFile):
 	#create default values
+	config.set_value("Global", "username", "username")
 	config.set_value("Graphics", "brightness", 1.0)
 	
 	#save config

@@ -235,11 +235,12 @@ anchor_bottom = 1.0
 offset_top = -41.0
 offset_right = 238.0
 grow_vertical = 0
-text = "Version : ALPHA 0.1.4"
+text = "Version : ALPHA 0.1.5"
 horizontal_alignment = 1
 
 [connection signal="pressed" from="Choice/Solo" to="." method="_on_solo_pressed"]
 [connection signal="pressed" from="Choice/Multiplayer" to="." method="_on_multiplayer_pressed"]
+[connection signal="text_changed" from="Choice/Name" to="." method="_on_name_text_changed"]
 [connection signal="pressed" from="Choice/Exit" to="." method="_on_exit_pressed"]
 [connection signal="pressed" from="Connect/Host" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="Connect/Join" to="." method="_on_join_pressed"]

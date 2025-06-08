@@ -59,7 +59,7 @@ func _process(_delta: float) -> void:
 				player_joined_in_game.emit()
 				players[player]["in_game"] = true
 				join_existing_game()
-				
+	
 	server_started = !players.keys().is_empty()
 
 
@@ -69,11 +69,12 @@ func _player_connected(id):
 	await get_tree().create_timer(0.1).timeout
 	players_list_changed.emit()
 
+
 func _player_disconnected(id):
 	print("player disconnected")
-	
-	if players[id]["in_game"]:
-		game_error.emit("Player " + players[id]["name"] + " disconnected")
+	for player in players:
+		if players[player]["in_game"]:
+			game_error.emit("Player " + players[id]["name"] + " disconnected")
 	remove_player(id)
 	unregister_player.rpc(id)
 	await get_tree().create_timer(0.1).timeout
@@ -116,12 +117,11 @@ func unregister_player(id):
 	print("unregistering player ", id)
 	players.erase(id)
 	
-@rpc("any_peer","call_local")
+@rpc("any_peer", "call_local")
 func remove_player(id):
 	for player in get_tree().get_nodes_in_group("Player"):
 		if int(player.name) == id:
 			player.queue_free()
-			print("player ", player.name, " removed")
 
 func host_game(new_player_name, password):
 	player_name = new_player_name
@@ -150,7 +150,6 @@ func join_game(ip, new_player_name, password):
 		if password != players[1]["password"]:
 			multiplayer.multiplayer_peer.close()
 			game_error.emit("WRONG PASSWORD")
-	
 
 func timeout():
 	if multiplayer.get_unique_id() not in players.keys():
@@ -183,9 +182,15 @@ func begin_game():
 	var spawns := []
 	for p: int in players:
 		spawns.append(p)
-
+	
 	for p_id: int in spawns:
-		spawn_player.rpc(p_id, GameManager.players[p_id]["data"])
+		spawn_player(p_id, players[p_id]["data"])
+		if p_id != 1:
+			spawn_player.rpc_id(p_id, p_id, players[p_id]["data"])
+		for other_id in spawns:
+			if other_id != p_id and other_id != 1:
+				spawn_player.rpc_id(other_id, p_id, players[p_id]["data"])
+
 
 @rpc("any_peer", "call_local")
 func join_existing_game():
@@ -194,12 +199,15 @@ func join_existing_game():
 	for pid in non_server_players:
 		if pid != id and players[pid]["in_game"]:
 			spawn_player.rpc_id(id, pid, GameManager.players[pid]["data"])
+	# spawn new player locally on himself
+	spawn_player.rpc_id(id, id, GameManager.players[id]["data"])
 	# send new player to existing clients
 	for pid in non_server_players:
 		if pid != id and players[pid]["in_game"]:
 			spawn_player.rpc_id(pid, id, GameManager.players[id]["data"])
-	# spawn new player locally
-	spawn_player.rpc_id(id, id, GameManager.players[id]["data"])
+	# spawn new player locally on server
+	if is_host:
+		spawn_player(id, players[id]["data"])
 
 func begin_solo():
 	load_world()
@@ -231,7 +239,7 @@ func spawn_player(id: int, data: Dictionary):
 	players[id]["ready"] = true
 	print("spawned player with id:", id)	
 
-	
+
 func end_game():
 	if get_tree().get_root().has_node("World"):
 		get_tree().get_root().get_node("World").queue_free()

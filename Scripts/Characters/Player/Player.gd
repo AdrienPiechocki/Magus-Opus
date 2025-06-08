@@ -49,16 +49,14 @@ func _process(_delta: float) -> void:
 	#Set player nametag and other players visibility:
 	if not GameManager.get_player_list().is_empty() and not is_name_set:
 		is_name_set = true
-		
 	if (1 in GameManager.players.keys() and GameManager.players[1]["solo"]) or is_multiplayer_authority():
 		Menu.visible = in_menu
 		HUD.visible = !in_menu
-	
 	for player in get_tree().get_nodes_in_group("Player"):
 		if player.name != name:
 			set_player_name.rpc_id(int(player.name))
 			set_visibility.rpc_id(int(player.name))
-	
+
 @rpc("any_peer", "call_local")
 func set_player_name():
 	if int(name) in GameManager.players:
@@ -85,10 +83,12 @@ func _physics_process(delta: float) -> void:
 		
 		#data synchronization:
 		if should_sync():
-			sync.rpc()
+			sync()
 		if delay <= 0.5:
 			delay += delta
-
+		if delay > 0.5:
+			delay = 0.5
+		
 		if out_of_bounds():
 			position = position_backup()
 			
@@ -110,7 +110,8 @@ func sync():
 			"lantern_lit": lantern_lit,
 			"in_menu": in_menu
 			}
-	GameManager.players[int(name)]["data"] = data
+	if int(name) in GameManager.players.keys():
+		GameManager.players[int(name)]["data"] = data
 	#backup last known positions
 	if delay >= 0.5:
 		delay = 0.0
