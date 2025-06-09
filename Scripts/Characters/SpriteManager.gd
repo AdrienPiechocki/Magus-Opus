@@ -100,7 +100,7 @@ func _process(_delta: float) -> void:
 		if side is AnimatedTexture:
 			side.speed_scale = animation_speed
 	
-	if npc or (1 in GameManager.players and GameManager.players[1]["solo"]):
+	if 1 in GameManager.players and GameManager.players[1]["solo"]:
 		angle = round_to_dec(get_parent().rotation_degrees.y, 1)
 		set_orientation(angle)
 		change_solo()
@@ -108,7 +108,11 @@ func _process(_delta: float) -> void:
 	elif !npc and int(get_parent().name) in GameManager.players and GameManager.players[int(get_parent().name)]["in_game"]:
 		update.rpc_id(int(get_parent().name))
 		change()
-	
+	elif npc:
+		angle = round_to_dec(get_parent().rotation_degrees.y, 1)
+		set_orientation(angle)
+		change()
+		
 func change():
 	for player in get_tree().get_nodes_in_group("Player"):
 		if player.name != get_parent().name:

@@ -102,11 +102,12 @@ func _physics_process(delta: float) -> void:
 						idle_bob_amount = 0.08
 				
 			State.STATE_LEANING:
+				lean()
 				if _player.velocity.length() > 0:
 					set_sprite_state.rpc(1, 0.4)
 				else:
 					set_sprite_state.rpc(0)
-				lean()
+				speed = slow_speed
 			
 			State.STATE_CROUCHING:
 				crouch()
@@ -150,13 +151,11 @@ func lean():
 	var from_sprite = Sprite.position
 	var to = camera_starting_pos + (Camera.global_transform.basis.x * -0.2 * axis)
 	var to_sprite = Sprite.global_transform.basis.x * -0.2 * axis
-	Camera.position = lerp(from, to, 0.1)
-	Sprite.position = lerp(from_sprite, to_sprite, 0.1)
+	Camera.position.x = lerp(from.x, to.x, 0.1)
+	Sprite.position.x = lerp(from_sprite.x, to_sprite.x, 0.1)
 	from = Camera.rotation_degrees.z
 	to = max_lean * axis
 	Camera.rotation_degrees.z = lerp(from, to, 0.1)
-	
-	speed = 4
 	
 	var diff = Camera.position - camera_starting_pos
 	if axis == 0 and diff.length() <= 0.01:
