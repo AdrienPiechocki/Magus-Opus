@@ -58,6 +58,7 @@ func _process(_delta: float) -> void:
 				load_world.rpc_id(player)
 				player_joined_in_game.emit()
 				players[player]["in_game"] = true
+				join_existing_game.rpc_id(1)
 				join_existing_game()
 	
 	server_started = !players.keys().is_empty()

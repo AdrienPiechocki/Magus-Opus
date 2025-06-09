@@ -11,9 +11,18 @@ func _ready():
 	GameManager.game_ended.connect(_on_game_ended)
 	GameManager.game_error.connect(_on_game_error)
 	GameManager.players_list_changed.connect(refresh_lobby)
-	# Set the player name according to the system username
-	if OS.has_environment("USERNAME"):
+	var config = ConfigFile.new()
+	var err = config.load("user://settings.cfg")
+	#if config doesn't exist, create config
+	if err == OK:
+		if not config.get_value("Global", "username").is_empty():
+			$Choice/Name.text = config.get_value("Global", "username")
+		# Set the player name according to the system username
+		elif OS.has_environment("USERNAME"):
+			$Choice/Name.text = OS.get_environment("USERNAME")
+	elif OS.has_environment("USERNAME"):
 		$Choice/Name.text = OS.get_environment("USERNAME")
+	
 
 func _on_solo_pressed() -> void:
 	var player_name = $Choice/Name.text 

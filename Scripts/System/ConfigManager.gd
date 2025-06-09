@@ -21,7 +21,7 @@ func load_config():
 		}
 func create_config(config:ConfigFile):
 	#create default values
-	config.set_value("Global", "username", "username")
+	config.set_value("Global", "username", "")
 	config.set_value("Graphics", "brightness", 1.0)
 	
 	#save config
