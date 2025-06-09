@@ -69,17 +69,18 @@ func set_visibility():
 	HUD.hide()
 
 @rpc("any_peer", "unreliable")
-func _update(new_position: Vector3, new_rotation_degrees: Vector3, new_lantern_lit:bool ,new_in_menu:bool):
+func _update(new_position: Vector3, new_rotation_degrees: Vector3, new_lantern_lit:bool ,new_in_menu:bool, new_sprite_pos:Vector3):
 	if not is_multiplayer_authority():
 		position = new_position
 		rotation_degrees = new_rotation_degrees
 		lantern_lit = new_lantern_lit
 		in_menu = new_in_menu
-
+		Sprite.position = new_sprite_pos
+		
 func _physics_process(delta: float) -> void:	
 	if int(name) in GameManager.players and GameManager.players[int(name)]["in_game"]:
 		if not GameManager.players[int(name)]["solo"] and (multiplayer.multiplayer_peer == null or is_multiplayer_authority()):
-			_update.rpc(position, rotation_degrees, lantern_lit, in_menu)
+			_update.rpc(position, rotation_degrees, lantern_lit, in_menu, Sprite.position)
 		
 		#data synchronization:
 		if should_sync():

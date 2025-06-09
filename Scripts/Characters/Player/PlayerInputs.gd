@@ -8,7 +8,7 @@ enum State {
 }
 var state = State.STATE_WALKING
 
-@export_range(-45.0, -8.0, 1.0) var max_lean
+@export_range(-45.0, -8.0, 1.0) var max_lean = -10
 var camera_starting_pos:Vector3
 var speed:float
 @export var base_speed:float = 7
@@ -102,6 +102,10 @@ func _physics_process(delta: float) -> void:
 						idle_bob_amount = 0.08
 				
 			State.STATE_LEANING:
+				if _player.velocity.length() > 0:
+					set_sprite_state.rpc(1, 0.4)
+				else:
+					set_sprite_state.rpc(0)
 				lean()
 			
 			State.STATE_CROUCHING:
@@ -143,8 +147,11 @@ func _unhandled_input(event: InputEvent) -> void:
 func lean():
 	var axis = (Input.get_action_strength("lean_right") - Input.get_action_strength("lean_left"))
 	var from = Camera.position
-	var to = camera_starting_pos + (Camera.global_transform.basis.x * 0.2 * axis)
+	var from_sprite = Sprite.position
+	var to = camera_starting_pos + (Camera.global_transform.basis.x * -0.2 * axis)
+	var to_sprite = Sprite.global_transform.basis.x * -0.2 * axis
 	Camera.position = lerp(from, to, 0.1)
+	Sprite.position = lerp(from_sprite, to_sprite, 0.1)
 	from = Camera.rotation_degrees.z
 	to = max_lean * axis
 	Camera.rotation_degrees.z = lerp(from, to, 0.1)
