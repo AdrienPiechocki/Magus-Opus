@@ -26,9 +26,9 @@ func _process(_delta) -> void:
 		return
 		
 	var level = get_light_level()
-	if _player.Inputs.state == _player.Inputs.State.STATE_CROUCHING and not _player.lantern_lit:
+	if _player.Inputs.state == _player.Inputs.States.STATE_CROUCHING and not _player.lantern_lit:
 		level = level / 1.2
-	if _player.Inputs.state == _player.Inputs.State.STATE_CRAWLING and not _player.lantern_lit:
+	if _player.Inputs.state == _player.Inputs.States.STATE_CRAWLING and not _player.lantern_lit:
 		level = level / 1.5
 	_player.light_level = level
 	_last_time_since_detect = _get_time()

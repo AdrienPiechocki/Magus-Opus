@@ -1,12 +1,15 @@
 extends Node
 
-enum State {
+enum States {
 	STATE_WALKING,
 	STATE_LEANING,
 	STATE_CROUCHING,
 	STATE_CRAWLING,
 }
-var state = State.STATE_WALKING
+var state:States = States.STATE_WALKING
+
+enum Input_Schemes { KEYBOARD_AND_MOUSE, GAMEPAD }
+var Input_Scheme:Input_Schemes = Input_Schemes.GAMEPAD
 
 @export_range(-45.0, -8.0, 1.0) var max_lean = -10
 var camera_starting_pos:Vector3
@@ -16,6 +19,7 @@ var speed:float
 @export var fast_speed:float = 14
 var max_fall_speed = -3
 var mouse_sensivity:float = 0.02
+var joystick_sensivity:float = 1.5
 var movement_dir:Vector3
 var flicker_amount:float = 0.2
 var bob_time:float = 0.0
@@ -40,6 +44,18 @@ func _ready() -> void:
 	camera_starting_pos = Camera.position
 	Hitbox.shape = Hitbox.shape.duplicate()
 	
+func _process(delta: float) -> void:
+	if Input_Schemes.GAMEPAD and Camera.current:
+		var axis_x = Input.get_joy_axis(0, JOY_AXIS_RIGHT_X)
+		var axis_y = Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y)
+
+		# Deadzone to prevent drift
+		if abs(axis_x) > 0.1:
+			get_parent().rotate_y(-axis_x * joystick_sensivity * delta)
+		if abs(axis_y) > 0.1:
+			Camera.rotation.x += -axis_y * joystick_sensivity * delta
+			Camera.rotation.x = clamp(Camera.rotation.x, deg_to_rad(-80), deg_to_rad(80))
+
 func _physics_process(delta: float) -> void:
 	movement(delta)
 	camera_bob(delta)
@@ -58,7 +74,7 @@ func _physics_process(delta: float) -> void:
 	
 	#SPECIFIC STATE ACTIONS:
 	match state:
-			State.STATE_WALKING:
+			States.STATE_WALKING:
 				speed = base_speed
 				
 				if _player.velocity.length() > 0 and _player.is_multiplayer_authority():
@@ -76,15 +92,15 @@ func _physics_process(delta: float) -> void:
 				set_collision_height(2.0)
 				
 				if Input.is_action_pressed("lean_left") or Input.is_action_pressed("lean_right"):
-					state = State.STATE_LEANING
+					state = States.STATE_LEANING
 					return
 				
 				if Input.is_action_pressed("crouch"):
-					state = State.STATE_CROUCHING
+					state = States.STATE_CROUCHING
 					return
 				
 				if Input.is_action_pressed("crawl"):
-					state = State.STATE_CRAWLING
+					state = States.STATE_CRAWLING
 					return
 					
 				if Input.is_action_pressed("sneak"):
@@ -101,7 +117,7 @@ func _physics_process(delta: float) -> void:
 						idle_bob_speed = 22
 						idle_bob_amount = 0.08
 				
-			State.STATE_LEANING:
+			States.STATE_LEANING:
 				lean()
 				if _player.velocity.length() > 0:
 					set_sprite_state.rpc(1, 0.4)
@@ -109,10 +125,10 @@ func _physics_process(delta: float) -> void:
 					set_sprite_state.rpc(0)
 				speed = slow_speed
 			
-			State.STATE_CROUCHING:
+			States.STATE_CROUCHING:
 				crouch()
 			
-			State.STATE_CRAWLING:
+			States.STATE_CRAWLING:
 				crawl(delta)
 			
 
@@ -159,14 +175,14 @@ func lean():
 	
 	var diff = Camera.position - camera_starting_pos
 	if axis == 0 and diff.length() <= 0.01:
-		state = State.STATE_WALKING
+		state = States.STATE_WALKING
 		return
 
 func crouch():
 	speed = slow_speed
 	set_collision_height(1.5)
 	if Input.is_action_just_released("crouch"):
-		state = State.STATE_WALKING
+		state = States.STATE_WALKING
 		return
 
 func crawl(delta:float):
@@ -175,7 +191,7 @@ func crawl(delta:float):
 	speed = slow_speed - 2
 	set_collision_height(1.0)
 	if Input.is_action_just_released("crawl"):
-		state = State.STATE_WALKING
+		state = States.STATE_WALKING
 		return
 
 func toggle_mouse():
